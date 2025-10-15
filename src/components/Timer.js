@@ -67,10 +67,10 @@ export default function Timer(){
     }, [settings])
 
     return <>
-        {settings.showTime && <Button style={{backgroundColor:"green", width:"98%", fontSize: "50px", marginTop: "20px", marginLeft: "10px", marginRight: "10px", marginBottom: "10px"}}>
+        {settings.showTime && <Button className="projector-time">
             {time}
         </Button>}
-        {!settings.showTime && <Button onClick={() => setTicking(!ticking)} style={{backgroundColor:"green", width:"98%", fontSize: "50px", marginTop: "20px", marginLeft: "10px", marginRight: "10px", marginBottom: "10px"}}>
+        {!settings.showTime && <Button onClick={() => setTicking(!ticking)} className="projector-timer">
             {humanReadableTime}
         </Button>}
     </>

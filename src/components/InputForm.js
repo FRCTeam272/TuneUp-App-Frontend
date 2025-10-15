@@ -20,7 +20,8 @@ export default function InputForm({teamData}){
                 Team Number 
                 <FontAwesomeIcon 
                     icon={isValid ? faCheckCircle : faXmarkCircle} 
-                    style={{color: isValid ? "green" : "red", marginLeft: "5px"}} 
+                    className="projector-icon"
+                    style={{color: isValid ? "#27ae60" : "#e74c3c"}} 
                     onClick={() => toast(isValid ? toast(`#${selectedTeam.number}: ${selectedTeam.name} is a real team`) : toast(`No Team found with that number`))} 
                     size="1x"/>
             </>,
@@ -38,7 +39,7 @@ export default function InputForm({teamData}){
     ]
 
     const form = Map.map((item) =>
-        <Form.Group key={item.key}>
+        <Form.Group key={item.key} className="projector-form">
                 <Form.Label>{item.text}</Form.Label>
                 {item.type != "checkbox" && <Form.Control id={item.text} type={item.type} {...item.input}></Form.Control>}
                 {item.type == "checkbox" && <Form.Check id={item.text} {...item.input}></Form.Check>}
@@ -47,7 +48,7 @@ export default function InputForm({teamData}){
 
     const checkField = Map.filter((item) => item.key === "number")[0]
     useEffect(() => {
-        
+        console.log(checkField.input.value)
         let inputedNumber = Number(checkField.input.value)
         if(inputedNumber == NaN){
             setIsValid(false)
@@ -56,7 +57,8 @@ export default function InputForm({teamData}){
         }
 
         let team = teamData.find((item) => {
-            return item.number === inputedNumber
+            console.log(item.team_id, inputedNumber)
+            return item.team_id === inputedNumber
         })
         
         if(team != undefined){
@@ -86,7 +88,7 @@ export default function InputForm({teamData}){
         // TODO: push new score to DB
 
         let inputedNumber = Number(checkField.input.value)
-        
+        console.log(teamData)
         teamData.find((item) => {
             return item.number === inputedNumber
         }).scores.push(payload.score)
@@ -99,9 +101,9 @@ export default function InputForm({teamData}){
     //     console.log(teamData)
     // }, [teamData])
 
-    return <Form>
+    return <Form className="projector-form">
         {form}
         <br /> <br />
-        <Button onClick={Update} style={{float:"right", backgroundColor:"green"}}>Submit</Button>
+        <Button onClick={Update} className="projector-button" style={{float:"right"}}>Submit</Button>
     </Form>
 }

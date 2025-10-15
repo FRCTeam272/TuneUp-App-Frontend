@@ -1,6 +1,7 @@
 import React from "react"
 import { useContext, useEffect, useState } from "react";
-import { Table } from "react-bootstrap";
+import { Table, Button } from "react-bootstrap";
+import { navigate } from "gatsby";
 import { settingsContext } from "../contexts/settingsContext";
 
 export default function ScoreTable({teamData, refreshData}){
@@ -8,7 +9,7 @@ export default function ScoreTable({teamData, refreshData}){
     const [settings, setSettings] = useContext(settingsContext)
     const [divisorHeader, setDivisorHeader] = useState("")
     const [mapIndex, setMapIndex] = useState(0);
-    const size = 10;
+    const size = settings.tableSize || 10;
     
 
     useEffect(() => {
@@ -35,8 +36,8 @@ export default function ScoreTable({teamData, refreshData}){
     useEffect(() => {
         let teams = teamData.map((item, index) => {
             let temp = {
-                number: item.number,
-                name: item.name,
+                number: item.team_id,
+                name: item.team_name,
                 scores: item.scores.toString(),
             }
             
@@ -81,8 +82,12 @@ export default function ScoreTable({teamData, refreshData}){
         return () => clearTimeout(timeout)
     }, [mutapleTeamData, mapIndex])
 
+    const handleTeamClick = (teamNumber) => {
+        navigate(`/team/${teamNumber}`);
+    };
+
     return <>
-        <Table striped bordered>
+        <Table striped bordered className="projector-table">
             <thead>
                 <tr>
                     <th>Place</th>
@@ -97,7 +102,16 @@ export default function ScoreTable({teamData, refreshData}){
                 mutapleTeamData.map((item, index) => {
                     return <tr key={index}>
                         <td>{item['place']}</td>
-                        <td>{item['number']}</td>
+                        <td>
+                            <Button 
+                                variant="link" 
+                                className="team-number-link"
+                                onClick={() => handleTeamClick(item['number'])}
+                                title={`View details for Team #${item['number']}`}
+                            >
+                                #{item['number']}
+                            </Button>
+                        </td>
                         <td>{item['name']}</td>
                         <td>{item['scores']}</td>
                         <td>{item["displayAverage"]}</td>

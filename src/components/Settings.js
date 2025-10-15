@@ -54,15 +54,30 @@ export default function Settings(){
                 setSettings(settingsCopy)
             },
             type: "button"
+        },
+        {
+            title: "Table Size",
+            key: "tableSize",
+            addSpace: true,
+            input: useInput(settings.tableSize || 10),
+            output: (val) => Number(val),
+            type: "text"
+        
+        },
+        {
+            title: "Password",
+            key: "password",
+            input: useInput(localStorage.getItem("password") || ""),
+            type: "password"
         }
     ]
     const form = Map.map((item) => {
-        return <Form.Group key={item.key}>
+        return <Form.Group key={item.key} className="projector-form">
                 {item.addSpace && <br></br>}
                 {item.type != "button" && <>
                 <Form.Label>{item.title}</Form.Label>
                 <Form.Control id={item.title} type={item.type} {...item.input}></Form.Control></>}
-                {item.type == "button" && <><Button onClick={item.onClick} style={{backgroundColor:"green"}}>{item.title}</Button></>}
+                {item.type == "button" && <><Button onClick={item.onClick} className="projector-button">{item.title}</Button></>}
             </Form.Group>
     })
 
@@ -77,13 +92,13 @@ export default function Settings(){
 
 
     return <>
-        <Modal show={!isHidden} onHide={() => setIsHidden(true)}>
+        <Modal show={!isHidden} onHide={() => setIsHidden(true)} className="projector-modal">
             <Modal.Header><h1>Settings</h1></Modal.Header>
             <Modal.Body>{form}</Modal.Body>
             <Modal.Footer>
-                <Button style={{backgroundColor:"green"}} onClick={Update}>Update Settings</Button>
+                <Button className="projector-button" onClick={Update}>Update Settings</Button>
             </Modal.Footer>
         </Modal>
-        <Button style={{backgroundColor:"green"}} onClick={() => setIsHidden(false)}>Settings</Button>
+        <Button className="projector-button" onClick={() => setIsHidden(false)}>Settings</Button>
     </>
 }

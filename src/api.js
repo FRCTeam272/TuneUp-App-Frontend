@@ -1,65 +1,109 @@
-export async function apiStatus(apiUrl){
-    return await fetch(`${apiUrl}/`, {
-        method: "GET",
-        headers:{
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "127.0.0.1/5000",
-            "Access-Control-Request-Headers": 'Content-Type, Authorization'
-        }
-    })
+export class Team_API_Client {
+    base_url = process.env.GATSBY_BACKEND_URL + "/team/";
+
+    getAllTeams() {
+        return fetch(this.base_url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+
+            },
+        }).then((response) => response.json());
+    }
+
+    createTeam(name, id, password) {
+        return fetch(this.base_url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, id, password })
+        }).then((response) => response.json());
+    }
+
+    getSpecificTeam(teamId) {
+        return fetch(`${this.base_url}/${teamId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then((response) => response.json());
+    }
+
+    deleteTeam(teamId, password) {
+        return fetch(`${this.base_url}/delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ teamId, password })
+        }).then((response) => response.json());
+    }
 }
 
-export async function getTeams(apiUrl){
-    return await fetch(`${apiUrl}/getTeams`, {
-        method: 'GET',
-        headers:{
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "127.0.0.1/5000",
-            "Access-Control-Request-Headers": 'Content-Type, Authorization'
-        }
-    })
+export class Score_API_Client {
+    base_url = process.env.GATSBY_BACKEND_URL + "/score/";
+
+    addScore(teamId, score, password) {
+        return fetch(this.base_url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ teamId, score, password })
+        }).then((response) => response.json());
+    }
+
+    removeScore(teamId, score, password) {
+        return fetch(this.base_url + "delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ teamId, score, password })
+        }).then((response) => response.json());
+    }
+
+    removeScoreById(scoreId, password) {
+        return fetch(this.base_url + "removeById", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ scoreId, password })
+        }).then((response) => response.json());
+    }
 }
 
-export async function getTeam(apiUrl, teamNumber){
-    return await fetch(`${apiUrl}/getTeam/${teamNumber}`, {
-        method: 'GET',
-        headers:{
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "127.0.0.1/5000",
-            "Access-Control-Request-Headers": 'Content-Type, Authorization'
-        }
-    })
-}
+export class Display_API_Client {
+    base_url = process.env.GATSBY_BACKEND_URL + "/display/";
 
-export async function addScore(apiUrl, teamNumber, score){
-    return await fetch(`${apiUrl}/addScore/${teamNumber}/${score}`, {
-        method: 'POST',
-        headers:{
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "127.0.0.1/5000",
-            "Access-Control-Request-Headers": 'Content-Type, Authorization'
-        }
-    })
-}
+    getDisplay() {
+        return fetch(this.base_url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        }).then((response) => response.json());
+    }
 
-export async function updateTeam(apiUrl, teamNumber, teamName, scores){
-    return await fetch(`${apiUrl}`, {
-        method: "POST",
-        body: {
-            number: teamNumber,
-            name: teamName,
-            scores: scores
-        }
-    })
-}
+    getDisplayById(teamId) {
+        return fetch(`${this.base_url}${teamId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+        }).then((response) => response.json());
+    }
 
-export async function removeTeam(apiUrl, teamNumber){
-    return await fetch(`${apiUrl}/removeTeam/${teamNumber}`, {
-        method: "DELETE",
-        headers:{
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "127.0.0.1/5000",
-            "Access-Control-Request-Headers": 'Content-Type, Authorization'
-        }
-    })
+    checkDisplayPassword(password) {
+        return fetch(this.base_url + 'check_password', {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password })
+        }).then((response) => response.json());
+    }
 }

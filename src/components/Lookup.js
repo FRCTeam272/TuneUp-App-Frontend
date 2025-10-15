@@ -46,12 +46,12 @@ export default function TeamLookUp({teamData}){
             return 
         }
         setform(Map.map((item) =>
-        <Form.Group key={item.key}>
+        <Form.Group key={item.key} className="projector-form">
             {item.addSpace && <br></br>}
             {item.type != "button" && <>
             <Form.Label>{item.title}</Form.Label>
             <Form.Control id={item.title} type={item.type} {...item.input}></Form.Control></>}
-            {item.type == "button" && <><Button onClick={item.onClick}>{item.title}</Button></>}
+            {item.type == "button" && <><Button onClick={item.onClick} className="projector-button">{item.title}</Button></>}
         </Form.Group>
         ))
 
@@ -68,10 +68,10 @@ export default function TeamLookUp({teamData}){
     }, [])
 
     return <>
-        <Modal show={!isHidden} onHide={() => setIsHidden(true)}>
+        <Modal show={!isHidden} onHide={() => setIsHidden(true)} className="projector-modal">
             <Modal.Header><h1>LookUp</h1></Modal.Header>
             <Modal.Body>
-                <Form>
+                <Form className="projector-form">
                     <Form.Group key="number">
                         <Form.Label>Team Number</Form.Label>
                         <Form.Control id="number" type="text" {...searchTerm}></Form.Control>
@@ -82,7 +82,7 @@ export default function TeamLookUp({teamData}){
                 <TeamEditorModal team={selectedTeam}></TeamEditorModal>
             </Modal.Footer>
         </Modal>
-        <Button style={{backgroundColor:"green", float:"right"}} onClick={() => setIsHidden(false)}>Team Info Lookup</Button>
+        <Button className="projector-button" style={{float:"right"}} onClick={() => setIsHidden(false)}>Team Info Lookup</Button>
     </>
 }
 
@@ -106,7 +106,7 @@ function TeamEditorModal({team}){
     }, [Map])
 
     const form = Map.map((item) => 
-        <Form.Group key={item.key}>
+        <Form.Group key={item.key} className="projector-form">
             <Form.Label>{item.title}</Form.Label>
             <Form.Control id={item.key} type={item.type} {...item.input} disabled={item.disabled}></Form.Control>
         </Form.Group>
@@ -117,17 +117,17 @@ function TeamEditorModal({team}){
     }
 
     return <>
-        <Modal show={!isHidden} onHide={() => setIsHidden(true)}>
+        <Modal show={!isHidden} onHide={() => setIsHidden(true)} className="projector-modal">
             <Modal.Header><h1>Team Editor</h1></Modal.Header>
             <Modal.Body>
-                <Form>
+                <Form className="projector-form">
                     {form}
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button style={{backgroundColor:"green", float:"right"}} onClick={Update}>Update</Button>
+                <Button className="projector-button" style={{float:"right"}} onClick={Update}>Update</Button>
             </Modal.Footer>
         </Modal>
-        <Button style={{backgroundColor:"green"}} onClick={() => setIsHidden(false)}>Open Editor</Button>
+        <Button className="projector-button" onClick={() => setIsHidden(false)}>Open Editor</Button>
     </>
 }
