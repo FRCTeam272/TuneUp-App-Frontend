@@ -44,13 +44,13 @@ export class Team_API_Client {
 export class Score_API_Client {
     base_url = process.env.GATSBY_BACKEND_URL + "/score/";
 
-    addScore(teamId, score, password) {
+    addScore(team_id, score, password) {
         return fetch(this.base_url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ teamId, score, password })
+            body: JSON.stringify({ team_id, score, password })
         }).then((response) => response.json());
     }
 

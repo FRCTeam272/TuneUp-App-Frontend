@@ -6,13 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmarkCircle } from "@fortawesome/free-regular-svg-icons"
 import { faCheckCircle } from "@fortawesome/free-regular-svg-icons"
 import { toast } from "react-hot-toast"
-import { addScore } from "../api"
+import { Score_API_Client } from "../api"
 import {settingsContext} from "../contexts/settingsContext"
 
 export default function InputForm({teamData}){
     const [isValid, setIsValid] = useState(false)
     const [settings, setSettings] = useContext(settingsContext)
     const [selectedTeam, setSelectedTeam] = useState({})
+    const client = new Score_API_Client()
 
     const Map = [
         {
@@ -89,11 +90,12 @@ export default function InputForm({teamData}){
 
         let inputedNumber = Number(checkField.input.value)
         console.log(teamData)
-        teamData.find((item) => {
-            return item.number === inputedNumber
-        }).scores.push(payload.score)
-        
-        addScore(settings.backendUrl, payload["number"], payload["score"]).then(() => toast(`Added Team #${payload['number']} a score of ${payload['score']}`))
+        let team = teamData.find((item) => {
+            return item.team_id === inputedNumber
+        })
+
+        console.log(team)
+        client.addScore(team.team_id, payload.score, settings.password).then(() => { toast(`Added Team #${payload['number']} a score of ${payload['score']}`)})
         console.log(payload)
     }
 
