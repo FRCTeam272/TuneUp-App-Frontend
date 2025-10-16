@@ -104,7 +104,7 @@ const TeamPage = ({ params }) => {
     }, [teamId]);
 
     const handleBackToScoreboard = () => {
-        navigate('/');
+        navigate('/scoreboard');
     };
 
     const handleRetry = () => {
@@ -248,6 +248,13 @@ const TeamPage = ({ params }) => {
                     <h4>⚠️ Error</h4>
                     <p>{error}</p>
                     <div className="d-flex gap-2">
+                        <Button 
+                            className="projector-button" 
+                            variant="outline-primary"
+                            onClick={() => navigate('/')}
+                        >
+                            🏠 Main Menu
+                        </Button>
                         <Button className="projector-button" onClick={handleBackToScoreboard}>
                             ← Back to Scoreboard
                         </Button>
@@ -268,12 +275,21 @@ const TeamPage = ({ params }) => {
             <Container fluid className="mt-3">
                 <Row>
                     <Col>
-                        <Button 
-                            className="projector-button mb-3" 
-                            onClick={handleBackToScoreboard}
-                        >
-                            ← Back to Scoreboard
-                        </Button>
+                        <div className="d-flex gap-2 mb-3">
+                            <Button 
+                                className="projector-button" 
+                                variant="outline-primary"
+                                onClick={() => navigate('/')}
+                            >
+                                🏠 Main Menu
+                            </Button>
+                            <Button 
+                                className="projector-button" 
+                                onClick={handleBackToScoreboard}
+                            >
+                                ← Back to Scoreboard
+                            </Button>
+                        </div>
                         
                         {passwordChecked && teamData && (
                             <TeamEditControls

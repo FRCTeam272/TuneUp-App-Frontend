@@ -10,8 +10,8 @@ const NumericRedirectPage = ({ params }) => {
             // Redirect to team page
             navigate(`/team/${id}`, { replace: true });
         } else {
-            // If not a number, redirect to home page
-            navigate('/', { replace: true });
+            // If not a number, redirect to scoreboard page
+            navigate('/scoreboard', { replace: true });
         }
     }, [id]);
 
