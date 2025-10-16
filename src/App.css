@@ -365,3 +365,43 @@
   border-color: #1f618d !important;
   box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.5) !important;
 }
+
+/* Team Edit Controls Styling */
+.team-edit-controls {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.edit-section {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  height: 100%;
+}
+
+.edit-section h6 {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.current-scores .badge {
+  margin: 2px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.current-scores .badge:hover {
+  background-color: #dc3545 !important;
+  transform: scale(1.1);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

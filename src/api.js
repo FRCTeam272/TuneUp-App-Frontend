@@ -21,8 +21,8 @@ export class Team_API_Client {
         }).then((response) => response.json());
     }
 
-    getSpecificTeam(teamId) {
-        return fetch(`${this.base_url}/${teamId}`, {
+    getSpecificTeam(team_id) {
+        return fetch(`${this.base_url}/${team_id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -30,13 +30,23 @@ export class Team_API_Client {
         }).then((response) => response.json());
     }
 
-    deleteTeam(teamId, password) {
+    deleteTeam(team_id, password) {
         return fetch(`${this.base_url}/delete`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ teamId, password })
+            body: JSON.stringify({ team_id, password })
+        }).then((response) => response.json());
+    }
+
+    editTeam(team_id, name, password) {
+        return fetch(`${this.base_url}rename`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ team_id, name, password })
         }).then((response) => response.json());
     }
 }
@@ -54,13 +64,13 @@ export class Score_API_Client {
         }).then((response) => response.json());
     }
 
-    removeScore(teamId, score, password) {
+    removeScore(team_id, score, password) {
         return fetch(this.base_url + "delete", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ teamId, score, password })
+            body: JSON.stringify({ team_id, score, password })
         }).then((response) => response.json());
     }
 

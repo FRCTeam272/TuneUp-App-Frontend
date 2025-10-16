@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import { navigate } from 'gatsby';
 import { Button, Container, Row, Col, Alert } from 'react-bootstrap';
 import { settingsContext } from '../../contexts/settingsContext';
-import { Display_API_Client } from '../../api';
+import { Display_API_Client, Team_API_Client, Score_API_Client} from '../../api';
 import TeamDetail from '../../components/TeamDetail';
+import TeamEditControls from '../../components/TeamEditControls';
 import '../../App.css';
 
 const TeamPage = ({ params }) => {
@@ -16,9 +17,36 @@ const TeamPage = ({ params }) => {
     const [teamData, setTeamData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isPasswordValid, setIsPasswordValid] = useState(false);
+    const [passwordChecked, setPasswordChecked] = useState(false);
     
     const displayApiClient = new Display_API_Client();
+    const team_client = new Team_API_Client();
+    const score_client = new Score_API_Client();
     const teamId = params.teamId;
+
+    useEffect(() => {
+        const checkPassword = async () => {
+            if (settings.password) {
+                try {
+                    console.log('Checking password validity...');
+                    const result = await displayApiClient.checkDisplayPassword(settings.password);
+                    console.log('Password check result:', result);
+                    setIsPasswordValid(result.status ||result.success || result.valid || false);
+                } catch (err) {
+                    console.error('Error checking password:', err);
+                    setIsPasswordValid(false);
+                } finally {
+                    setPasswordChecked(true);
+                }
+            } else {
+                setPasswordChecked(true);
+                setIsPasswordValid(false);
+            }
+        };
+
+        checkPassword();
+    }, [settings.password]);
 
     useEffect(() => {
         const fetchTeamData = async () => {
@@ -132,6 +160,77 @@ const TeamPage = ({ params }) => {
         fetchTeamData();
     };
 
+    const handleEditTeamName = async (newName) => {
+        try {
+            console.log('Editing team name to:', newName);
+            const result = await team_client.editTeam(teamId, newName, settings.password);
+            console.log('Edit team result:', result);
+            result.success = result.detail; 
+            if (result.success || result.message === 'Team name updated successfully') {
+                // Update the teamData with the new name
+                setTeamData(prev => ({
+                    ...prev,
+                    team_name: newName
+                }));
+                return { success: true };
+            } else {
+                throw new Error(result.message || 'Failed to update team name');
+            }
+        } catch (err) {
+            console.error('Error editing team name:', err);
+            return { success: false, error: err.message };
+        }
+    };
+
+    const handleAddScore = async (score) => {
+        try {
+            console.log('Adding score:', score);
+            const result = await score_client.addScore(teamId, parseInt(score), settings.password);
+            result.success = result.team_id === teamData.team_id && result.score === score;
+            console.log('Add score result:', result);
+            
+            if (result.success || result.message === 'Score added successfully') {
+                // Refresh team data to get updated scores
+                const data = await displayApiClient.getDisplayById(teamId);
+                if (data && Array.isArray(data) && data.length > 0) {
+                    setTeamData(data[0]);
+                } else if (data && !Array.isArray(data)) {
+                    setTeamData(data);
+                }
+                return { success: true };
+            } else {
+                throw new Error(result.message || 'Failed to add score');
+            }
+        } catch (err) {
+            console.error('Error adding score:', err);
+            return { success: false, error: err.message };
+        }
+    };
+
+    const handleRemoveScore = async (score) => {
+        try {
+            console.log('Removing score:', score);
+            const result = await score_client.removeScore(teamId, parseInt(score), settings.password);
+            console.log('Remove score result:', result);
+            result.success = result.detail;
+            if (result.success || result.message === 'Score removed successfully') {
+                // Refresh team data to get updated scores
+                const data = await displayApiClient.getDisplayById(teamId);
+                if (data && Array.isArray(data) && data.length > 0) {
+                    setTeamData(data[0]);
+                } else if (data && !Array.isArray(data)) {
+                    setTeamData(data);
+                }
+                return { success: true };
+            } else {
+                throw new Error(result.message || 'Failed to remove score');
+            }
+        } catch (err) {
+            console.error('Error removing score:', err);
+            return { success: false, error: err.message };
+        }
+    };
+
     if (loading) {
         return (
             <Container className="mt-4">
@@ -175,6 +274,16 @@ const TeamPage = ({ params }) => {
                         >
                             ← Back to Scoreboard
                         </Button>
+                        
+                        {passwordChecked && teamData && (
+                            <TeamEditControls
+                                teamData={teamData}
+                                onEditTeamName={handleEditTeamName}
+                                onAddScore={handleAddScore}
+                                onRemoveScore={handleRemoveScore}
+                                isPasswordValid={isPasswordValid}
+                            />
+                        )}
                         
                         {console.log('About to render TeamDetail with teamData:', teamData)}
                         {teamData && (
