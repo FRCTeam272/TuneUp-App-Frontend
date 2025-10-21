@@ -23,7 +23,24 @@ module.exports = {
         background_color: "#ffffff",
         theme_color: "#000000",
         display: "minimal-ui",
-        icon: "static/logo192.png",
+        icon: "static/favicon.png", // Main icon for PWA
+        icons: [
+          {
+            src: "static/favicon.ico",
+            sizes: "32x32",
+            type: "image/x-icon",
+          },
+          {
+            src: "static/favicon.png", 
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "static/logo512.png",
+            sizes: "512x512", 
+            type: "image/png",
+          },
+        ],
       },
     },
   ],
