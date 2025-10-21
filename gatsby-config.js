@@ -1,7 +1,21 @@
 /**
  * @type {import('gatsby').GatsbyConfig}
  */
-require("dotenv").config()
+
+// Load environment-specific configuration
+const path = require('path')
+
+// Determine which environment file to use
+const isDevelopment = process.env.NODE_ENV === 'development' || process.env.GATSBY_ENV === 'development'
+const envFile = isDevelopment ? '.env.dev' : '.env'
+
+// Load the appropriate environment file
+require("dotenv").config({
+  path: path.resolve(process.cwd(), envFile)
+})
+
+console.log(`🌍 Loading environment from: ${envFile}`)
+console.log(`🔗 Backend URL: ${process.env.GATSBY_BACKEND_URL}`)
 
 module.exports = {
   siteMetadata: {
