@@ -67,7 +67,7 @@ export default function Settings(){
         {
             title: "Password",
             key: "password",
-            input: useInput(localStorage.getItem("password") || ""),
+            input: useInput(typeof window !== 'undefined' ? localStorage.getItem("password") || "" : ""),
             type: "password"
         }
     ]
