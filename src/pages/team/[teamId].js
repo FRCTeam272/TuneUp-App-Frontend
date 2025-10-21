@@ -10,9 +10,16 @@ import '../../App.css';
 const TeamPage = ({ params }) => {
     const [settings, setSettings] = useState({
         backendUrl: process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000",
-        password: localStorage.getItem("password") || "",
+        // password: localStorage.getItem("password") || "",
         divisor: parseInt(process.env.GATSBY_DIVISOR) || 3,
     });
+
+    useEffect(() => {
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            password: localStorage.getItem("password") || "",
+        }));
+    }, [])
     
     const [teamData, setTeamData] = useState(null);
     const [loading, setLoading] = useState(true);

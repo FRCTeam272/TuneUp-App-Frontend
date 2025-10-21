@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Button, Form, InputGroup } from 'react-boots
 import { navigate } from 'gatsby';
 import { Display_API_Client } from '../api';
 import '../App.css';
+import { use } from "react";
 
 const IndexPage = () => {
     const [teamNumber, setTeamNumber] = useState('');
@@ -11,7 +12,12 @@ const IndexPage = () => {
     const [passwordChecked, setPasswordChecked] = useState(false);
     
     const displayApiClient = new Display_API_Client();
-    const password = localStorage.getItem("password") || "";
+    const [password, setPassword] = useState('');
+
+    useEffect(() => {
+        const storedPassword = localStorage.getItem('displayPassword') || '';
+        setPassword(storedPassword);
+    }, []);
 
     // Check password validity on component mount
     useEffect(() => {

@@ -8,10 +8,10 @@ import { Team_API_Client, Display_API_Client, Score_API_Client } from '../api';
 import toast, { Toaster } from 'react-hot-toast';
 import '../App.css';
 
-const AdminPage = () => {
+const AdminPage = ({ serverData }) => {
     const [settings, setSettings] = useState({
         backendUrl: process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000",
-        password: localStorage.getItem("password") || "",
+        password: typeof window !== 'undefined' ? localStorage.getItem("password") || "" : "",
         divisor: parseInt(process.env.GATSBY_DIVISOR) || 3,
     });
 
@@ -335,3 +335,34 @@ const AdminPage = () => {
 export default AdminPage;
 
 export const Head = () => <title>Admin Panel - FLL Scoreboard</title>;
+
+// Server-side rendering function
+export async function getServerData(context) {
+  try {
+    // You can fetch initial data here on the server
+    const backendUrl = process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000";
+    
+    // Example: Pre-fetch team data on server
+    // const response = await fetch(`${backendUrl}/display`);
+    // const teamData = await response.json();
+    
+    return {
+      status: 200,
+      props: {
+        // teamData, // Pass data as props
+        serverRendered: true,
+        timestamp: new Date().toISOString()
+      }
+    }
+  } catch (error) {
+    console.error('Server-side data fetching failed:', error);
+    return {
+      status: 200,
+      props: {
+        serverRendered: true,
+        error: 'Failed to fetch server data',
+        timestamp: new Date().toISOString()
+      }
+    }
+  }
+}

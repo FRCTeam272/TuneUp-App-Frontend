@@ -34,10 +34,16 @@ const ScoreboardPage = () => {
             showForm: process.env.GATSBY_SHOW_FORM === 'true',
             backendUrl: process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000",
             divisor: parseInt(process.env.GATSBY_DIVISOR) || 3,
-            password: localStorage.getItem("password") || "",
-            tableSize: localStorage.getItem("tableSize") || 10,
         }
     )
+
+    useEffect(() => {
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            password: localStorage.getItem("password") || "",
+            tableSize: localStorage.getItem("tableSize") || 10,
+        }));
+    }, [])
 
     const offset = settings.showForm ? 80 : 100
 

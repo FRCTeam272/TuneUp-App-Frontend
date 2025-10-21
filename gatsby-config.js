@@ -9,6 +9,9 @@ module.exports = {
     description: "FLL (First Lego League) Scoreboard Application",
     siteUrl: "http://localhost:8000"
   },
+  flags: {
+    DEV_SSR: true // Enable SSR in development
+  },
   plugins: [
     "gatsby-plugin-styled-components",
     {
