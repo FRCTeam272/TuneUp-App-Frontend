@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Button, Form, InputGroup } from 'react-boots
 import { navigate } from 'gatsby';
 import { Display_API_Client } from '../api';
 import '../App.css';
-import { use } from "react";
+import '../mobile.css';
 
 const IndexPage = () => {
     const [teamNumber, setTeamNumber] = useState('');
@@ -77,19 +77,19 @@ const IndexPage = () => {
     };
 
     return (
-        <Container className="mt-5">
+        <Container className="mt-3 mt-md-5">
             <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <div className="text-center mb-5">
-                        <h1 className="display-4 mb-3">🤖 FLL Scoreboard</h1>
+                <Col xs={12} sm={10} md={8} lg={6}>
+                    <div className="text-center mb-4 mb-md-5">
+                        <h1 className="display-5 display-md-4 mb-3">🤖 FLL Scoreboard</h1>
                         <p className="lead text-muted">
                             FIRST LEGO League Competition Management System
                         </p>
                     </div>
                     
-                    <Row className="g-4">
+                    <Row className="g-3 g-md-4">
                         {menuItems.map((item, index) => (
-                            <Col key={index} sm={6}>
+                            <Col key={index} xs={12} sm={6}>
                                 <Card className="h-100 shadow-sm">
                                     <Card.Body className="d-flex flex-column text-center p-4">
                                         <Card.Title className="h3 mb-3">
@@ -127,8 +127,9 @@ const IndexPage = () => {
                                 
                                 <Form onSubmit={handleTeamNavigation}>
                                     <Row className="justify-content-center">
-                                        <Col md={8} lg={6}>
-                                            <InputGroup size="lg">
+                                        <Col xs={12} md={8} lg={6}>
+                                            <div className="d-md-none mb-3">
+                                                {/* Mobile: Stacked layout */}
                                                 <Form.Control
                                                     type="text"
                                                     placeholder="Enter team number (e.g., 12345)"
@@ -136,16 +137,40 @@ const IndexPage = () => {
                                                     onChange={handleTeamInputChange}
                                                     pattern="[0-9]*"
                                                     inputMode="numeric"
+                                                    size="lg"
+                                                    className="mb-2"
                                                 />
                                                 <Button 
                                                     variant="success"
                                                     type="submit"
                                                     disabled={!teamNumber.trim() || !/^\d+$/.test(teamNumber.trim())}
-                                                    className="projector-button"
+                                                    className="projector-button w-100"
+                                                    size="lg"
                                                 >
                                                     Go to Team
                                                 </Button>
-                                            </InputGroup>
+                                            </div>
+                                            <div className="d-none d-md-block">
+                                                {/* Desktop: Input group layout */}
+                                                <InputGroup size="lg">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Enter team number (e.g., 12345)"
+                                                        value={teamNumber}
+                                                        onChange={handleTeamInputChange}
+                                                        pattern="[0-9]*"
+                                                        inputMode="numeric"
+                                                    />
+                                                    <Button 
+                                                        variant="success"
+                                                        type="submit"
+                                                        disabled={!teamNumber.trim() || !/^\d+$/.test(teamNumber.trim())}
+                                                        className="projector-button"
+                                                    >
+                                                        Go to Team
+                                                    </Button>
+                                                </InputGroup>
+                                            </div>
                                         </Col>
                                     </Row>
                                 </Form>

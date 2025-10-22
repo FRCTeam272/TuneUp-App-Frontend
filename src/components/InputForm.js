@@ -8,6 +8,7 @@ import { faCheckCircle } from "@fortawesome/free-regular-svg-icons"
 import { toast } from "react-hot-toast"
 import { Score_API_Client } from "../api"
 import {settingsContext} from "../contexts/settingsContext"
+import "../mobile.css"
 
 export default function InputForm({teamData}){
     const [isValid, setIsValid] = useState(false)

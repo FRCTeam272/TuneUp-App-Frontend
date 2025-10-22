@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Container, Row, Col } from 'react-bootstrap';
 import { navigate } from 'gatsby';
 import toast, { Toaster } from 'react-hot-toast';
 import Timer from '../components/Timer';
@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { settingsContext } from '../contexts/settingsContext';
 import { Team_API_Client, Display_API_Client } from "../api";
 import '../App.css';
+import '../mobile.css';
 
 const FloatContainer = styled.div`
   padding: 5px;
@@ -76,31 +77,82 @@ const ScoreboardPage = () => {
     };
 
     return <settingsContext.Provider value={[settings, setSettings]}>
-        <Timer></Timer>
-        <FloatContainer>
-            <FloatChild style={{ width: `${offset}%` }}>
-                <ScoreTable teamData={teamData} refreshData={refreshData}></ScoreTable>
-                <br />
-                <div className="d-flex gap-2">
-                    <Button 
-                        className="projector-button" 
-                        variant="outline-primary"
-                        onClick={() => navigate('/')}
-                    >
-                        🏠 Main Menu
-                    </Button>
-                    <Settings></Settings>
-                    <Button className="projector-button" onClick={handleAdminClick}>
-                        Admin Panel
-                    </Button>
-                </div>
-                {/* <TeamLookUp teamData={teamData}></TeamLookUp> */}
-            </FloatChild>
-            <FloatChild style={{ width: `${100 - offset}%` }}>
-                {settings.showForm && <InputForm teamData={teamData}></InputForm>}
-            </FloatChild>
-        </FloatContainer>
-        <Toaster position="bottom-right" reverseOrder={false}></Toaster>
+        <Container fluid className="p-0">
+            {/* Timer - Full Width */}
+            <Row className="mb-3">
+                <Col xs={12}>
+                    <Timer></Timer>
+                </Col>
+            </Row>
+
+            {/* Desktop Layout */}
+            <div className="d-none d-lg-block">
+                <FloatContainer>
+                    <FloatChild style={{ width: `${offset}%` }}>
+                        <ScoreTable teamData={teamData} refreshData={refreshData}></ScoreTable>
+                        <br />
+                        <div className="d-flex gap-2">
+                            <Button 
+                                className="projector-button" 
+                                variant="outline-primary"
+                                onClick={() => navigate('/')}
+                            >
+                                🏠 Main Menu
+                            </Button>
+                            <Settings></Settings>
+                            <Button className="projector-button" onClick={handleAdminClick}>
+                                Admin Panel
+                            </Button>
+                        </div>
+                    </FloatChild>
+                    <FloatChild style={{ width: `${100 - offset}%` }}>
+                        {settings.showForm && <InputForm teamData={teamData}></InputForm>}
+                    </FloatChild>
+                </FloatContainer>
+            </div>
+
+            {/* Mobile/Tablet Layout */}
+            <div className="d-lg-none">
+                <Container>
+                    <Row className="mb-3">
+                        <Col xs={12}>
+                            <ScoreTable teamData={teamData} refreshData={refreshData}></ScoreTable>
+                        </Col>
+                    </Row>
+
+                    {/* Navigation Buttons - Mobile Stacked */}
+                    <Row className="mb-3">
+                        <Col xs={12}>
+                            <div className="d-grid gap-2">
+                                <Button 
+                                    className="projector-button" 
+                                    variant="outline-primary"
+                                    onClick={() => navigate('/')}
+                                >
+                                    🏠 Main Menu
+                                </Button>
+                                <div className="d-flex gap-2">
+                                    <Settings></Settings>
+                                    <Button className="projector-button flex-grow-1" onClick={handleAdminClick}>
+                                        Admin Panel
+                                    </Button>
+                                </div>
+                            </div>
+                        </Col>
+                    </Row>
+
+                    {/* Input Form - Mobile */}
+                    {settings.showForm && (
+                        <Row>
+                            <Col xs={12}>
+                                <InputForm teamData={teamData}></InputForm>
+                            </Col>
+                        </Row>
+                    )}
+                </Container>
+            </div>
+        </Container>
+        <Toaster position="bottom-center" reverseOrder={false}></Toaster>
     </settingsContext.Provider>
 }
 

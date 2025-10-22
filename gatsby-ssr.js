@@ -2,6 +2,26 @@ import React from "react"
 
 export const onRenderBody = ({ setHeadComponents }) => {
   setHeadComponents([
+    <meta
+      key="viewport"
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover"
+    />,
+    <meta
+      key="mobile-web-app-capable"
+      name="mobile-web-app-capable"
+      content="yes"
+    />,
+    <meta
+      key="apple-mobile-web-app-capable"
+      name="apple-mobile-web-app-capable"
+      content="yes"
+    />,
+    <meta
+      key="apple-mobile-web-app-status-bar-style"
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />,
     <link
       key="favicon-ico"
       rel="icon"

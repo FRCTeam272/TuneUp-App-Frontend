@@ -7,6 +7,7 @@ import { settingsContext } from '../contexts/settingsContext';
 import { Team_API_Client, Display_API_Client, Score_API_Client } from '../api';
 import toast, { Toaster } from 'react-hot-toast';
 import '../App.css';
+import '../mobile.css';
 
 const AdminPage = ({ serverData }) => {
     const [settings, setSettings] = useState({
@@ -162,12 +163,12 @@ const AdminPage = ({ serverData }) => {
 
     return (
         <settingsContext.Provider value={[settings, setSettings]}>
-            <Container fluid className="mt-3">
-                <Row className="mb-4">
-                    <Col>
-                        <div className="d-flex justify-content-between align-items-center">
-                            <h1>🏆 FLL Admin Panel</h1>
-                            <div className="d-flex gap-2">
+            <Container fluid className="mt-2 mt-md-3">
+                <Row className="mb-3 mb-md-4">
+                    <Col xs={12}>
+                        <div className="d-flex justify-content-between align-items-start flex-column flex-md-row">
+                            <h1 className="h3 h-md-1 mb-3 mb-md-0">🏆 FLL Admin Panel</h1>
+                            <div className="d-flex gap-2 flex-column flex-md-row w-100 w-md-auto">
                                 <Button 
                                     className="projector-button" 
                                     variant="outline-primary"
