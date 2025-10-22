@@ -61,14 +61,34 @@ module.exports = {
   // Development proxy configuration
   developMiddleware: app => {
     const { createProxyMiddleware } = require("http-proxy-middleware");
+    
+    // Add CORS headers middleware
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+      
+      // Handle preflight requests
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+      } else {
+        next();
+      }
+    });
+
+    // Proxy API requests to backend
     app.use(
       "/api",
       createProxyMiddleware({
-        target: "http://127.0.0.1:5000",
+        target: process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:8001",
         changeOrigin: true,
+        secure: false, // Allow self-signed certificates in development
         pathRewrite: {
           "^/api": "",
         },
+        onProxyReq: (proxyReq, req, res) => {
+          console.log(`🔄 Proxying ${req.method} ${req.url} → ${proxyReq.getHeader('host')}${proxyReq.path}`);
+        }
       })
     );
   },
