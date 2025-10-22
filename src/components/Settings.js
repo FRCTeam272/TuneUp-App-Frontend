@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react"
 import useInput from "../hooks/useInput";
 import { minutesToSeconds } from "./Timer";
 import { settingsContext } from "../contexts/settingsContext";
+import "../mobile.css";
 
 export default function Settings(){
     const [isHidden, setIsHidden] = useState(true)

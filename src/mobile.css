@@ -1,0 +1,450 @@
+/* Mobile-Responsive CSS for FLL Scoreboard */
+
+/* Mobile-first approach with responsive breakpoints */
+:root {
+  --mobile-font-small: 0.875rem;
+  --mobile-font-base: 1rem;
+  --mobile-font-large: 1.25rem;
+  --mobile-font-xl: 1.5rem;
+  --mobile-spacing-xs: 0.25rem;
+  --mobile-spacing-sm: 0.5rem;
+  --mobile-spacing-md: 1rem;
+  --mobile-spacing-lg: 1.5rem;
+  --mobile-spacing-xl: 2rem;
+  --mobile-touch-target: 44px;
+}
+
+/* Base mobile styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Container overrides for mobile */
+@media (max-width: 767.98px) {
+  .container,
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl {
+    padding-left: var(--mobile-spacing-sm) !important;
+    padding-right: var(--mobile-spacing-sm) !important;
+  }
+}
+
+/* Mobile-responsive buttons */
+@media (max-width: 767.98px) {
+  .projector-button {
+    font-size: var(--mobile-font-base) !important;
+    padding: var(--mobile-spacing-sm) var(--mobile-spacing-md) !important;
+    min-height: var(--mobile-touch-target) !important;
+    margin-bottom: var(--mobile-spacing-sm) !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  .btn {
+    min-height: var(--mobile-touch-target);
+    padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
+  }
+  
+  .btn-sm {
+    min-height: 36px;
+    padding: var(--mobile-spacing-xs) var(--mobile-spacing-sm);
+    font-size: var(--mobile-font-small);
+  }
+  
+  .btn-lg {
+    min-height: 52px;
+    padding: var(--mobile-spacing-md) var(--mobile-spacing-lg);
+    font-size: var(--mobile-font-large);
+  }
+}
+
+/* Mobile timer styling */
+@media (max-width: 767.98px) {
+  .projector-timer {
+    font-size: 2rem !important;
+    padding: var(--mobile-spacing-md) !important;
+    margin: var(--mobile-spacing-sm) !important;
+    width: calc(100% - var(--mobile-spacing-md)) !important;
+  }
+  
+  .projector-time {
+    font-size: 2rem !important;
+    padding: var(--mobile-spacing-md) !important;
+    margin: var(--mobile-spacing-sm) !important;
+    width: calc(100% - var(--mobile-spacing-md)) !important;
+  }
+}
+
+/* Responsive table wrapper */
+.mobile-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 767.98px) {
+  .projector-table {
+    font-size: var(--mobile-font-small) !important;
+    margin-bottom: 0 !important;
+    min-width: 600px; /* Minimum width to prevent crushing */
+  }
+  
+  .projector-table th {
+    font-size: var(--mobile-font-base) !important;
+    padding: var(--mobile-spacing-sm) !important;
+    white-space: nowrap;
+  }
+  
+  .projector-table td {
+    padding: var(--mobile-spacing-xs) var(--mobile-spacing-sm) !important;
+    font-size: var(--mobile-font-small) !important;
+  }
+  
+  .team-number-link {
+    font-size: var(--mobile-font-base) !important;
+    padding: var(--mobile-spacing-xs) var(--mobile-spacing-sm) !important;
+    min-height: var(--mobile-touch-target);
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Mobile card layouts for data display */
+.mobile-card-view {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .mobile-table-wrapper {
+    display: none;
+  }
+  
+  .mobile-card-view {
+    display: block;
+  }
+  
+  .mobile-team-card {
+    background: white;
+    border: 2px solid #2c3e50;
+    border-radius: 12px;
+    padding: var(--mobile-spacing-md);
+    margin-bottom: var(--mobile-spacing-md);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .mobile-team-card.rank-1 {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+    border-color: #d68910;
+  }
+  
+  .mobile-team-card.rank-2 {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+    border-color: #6c7b7d;
+  }
+  
+  .mobile-team-card.rank-3 {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: white;
+    border-color: #ba4a00;
+  }
+  
+  .mobile-team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--mobile-spacing-sm);
+  }
+  
+  .mobile-team-rank {
+    background: rgba(0,0,0,0.2);
+    color: white;
+    padding: var(--mobile-spacing-xs) var(--mobile-spacing-sm);
+    border-radius: 20px;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+  }
+  
+  .mobile-team-number {
+    font-size: var(--mobile-font-xl);
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .mobile-team-name {
+    color: #7f8c8d;
+    margin-bottom: var(--mobile-spacing-sm);
+    font-size: var(--mobile-font-base);
+  }
+  
+  .mobile-card-view .mobile-team-card.rank-1 .mobile-team-name,
+  .mobile-card-view .mobile-team-card.rank-2 .mobile-team-name,
+  .mobile-card-view .mobile-team-card.rank-3 .mobile-team-name {
+    color: rgba(255,255,255,0.9);
+  }
+  
+  .mobile-team-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--mobile-spacing-sm);
+    margin-top: var(--mobile-spacing-sm);
+  }
+  
+  .mobile-stat {
+    text-align: center;
+    padding: var(--mobile-spacing-sm);
+    background: rgba(0,0,0,0.05);
+    border-radius: 6px;
+  }
+  
+  .mobile-card-view .mobile-team-card.rank-1 .mobile-stat,
+  .mobile-card-view .mobile-team-card.rank-2 .mobile-stat,
+  .mobile-card-view .mobile-team-card.rank-3 .mobile-stat {
+    background: rgba(255,255,255,0.2);
+    color: white;
+  }
+  
+  .mobile-stat-label {
+    font-size: var(--mobile-font-small);
+    opacity: 0.8;
+    margin-bottom: 2px;
+  }
+  
+  .mobile-stat-value {
+    font-size: var(--mobile-font-base);
+    font-weight: bold;
+  }
+  
+  .mobile-team-button {
+    width: 100%;
+    margin-top: var(--mobile-spacing-sm);
+    background: rgba(0,0,0,0.1) !important;
+    border: 2px solid rgba(0,0,0,0.2) !important;
+    color: inherit !important;
+  }
+  
+  .mobile-team-button:hover {
+    background: rgba(0,0,0,0.2) !important;
+    border-color: rgba(0,0,0,0.3) !important;
+  }
+}
+
+/* Form styling for mobile */
+@media (max-width: 767.98px) {
+  .projector-form .form-label {
+    font-size: var(--mobile-font-base) !important;
+    margin-bottom: var(--mobile-spacing-xs) !important;
+  }
+  
+  .projector-form .form-control {
+    font-size: var(--mobile-font-base) !important;
+    padding: var(--mobile-spacing-sm) !important;
+    min-height: var(--mobile-touch-target);
+  }
+  
+  .form-control,
+  .form-select {
+    min-height: var(--mobile-touch-target);
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .input-group .form-control {
+    border-radius: 6px 0 0 6px !important;
+  }
+  
+  .input-group .btn {
+    border-radius: 0 6px 6px 0 !important;
+  }
+}
+
+/* Modal improvements for mobile */
+@media (max-width: 767.98px) {
+  .modal-dialog {
+    margin: var(--mobile-spacing-sm) !important;
+    max-width: calc(100% - var(--mobile-spacing-md)) !important;
+  }
+  
+  .projector-modal .modal-header {
+    padding: var(--mobile-spacing-md) !important;
+  }
+  
+  .projector-modal .modal-body {
+    padding: var(--mobile-spacing-md) !important;
+    font-size: var(--mobile-font-base) !important;
+  }
+  
+  .projector-modal .modal-footer {
+    padding: var(--mobile-spacing-md) !important;
+  }
+  
+  .modal-header h1,
+  .modal-header h4 {
+    font-size: var(--mobile-font-xl) !important;
+  }
+}
+
+/* Card layouts for mobile */
+@media (max-width: 767.98px) {
+  .card {
+    margin-bottom: var(--mobile-spacing-md);
+  }
+  
+  .card-body {
+    padding: var(--mobile-spacing-md) !important;
+  }
+  
+  .card-title {
+    font-size: var(--mobile-font-large) !important;
+    margin-bottom: var(--mobile-spacing-sm) !important;
+  }
+  
+  .card-text {
+    font-size: var(--mobile-font-base) !important;
+  }
+}
+
+/* Navigation improvements */
+@media (max-width: 767.98px) {
+  .d-flex.justify-content-between {
+    flex-direction: column !important;
+  }
+  
+  .d-flex.justify-content-between > * {
+    margin-bottom: var(--mobile-spacing-sm);
+  }
+  
+  .d-flex.justify-content-between > *:last-child {
+    margin-bottom: 0;
+  }
+  
+  .d-flex.gap-2 {
+    flex-direction: column !important;
+  }
+  
+  .d-flex.gap-2 > * {
+    margin-bottom: var(--mobile-spacing-sm) !important;
+  }
+}
+
+/* Alert improvements */
+@media (max-width: 767.98px) {
+  .alert {
+    margin-bottom: var(--mobile-spacing-md);
+    padding: var(--mobile-spacing-md);
+    font-size: var(--mobile-font-base);
+  }
+}
+
+/* Progress bar mobile styling */
+@media (max-width: 767.98px) {
+  .progress {
+    height: 20px !important;
+    margin-bottom: var(--mobile-spacing-sm);
+  }
+  
+  .progress-bar {
+    font-size: var(--mobile-font-small) !important;
+  }
+}
+
+/* Stat boxes mobile styling */
+@media (max-width: 767.98px) {
+  .stat-box {
+    padding: var(--mobile-spacing-md);
+    margin-bottom: var(--mobile-spacing-md);
+  }
+  
+  .stat-box h4 {
+    font-size: var(--mobile-font-base);
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+  }
+  
+  .stat-box small {
+    font-size: var(--mobile-font-small);
+  }
+}
+
+/* Toast notifications for mobile */
+@media (max-width: 767.98px) {
+  .projector-toast {
+    font-size: var(--mobile-font-base) !important;
+    padding: var(--mobile-spacing-md) !important;
+    max-width: calc(100vw - var(--mobile-spacing-md)) !important;
+  }
+}
+
+/* Utility classes for mobile */
+.mobile-hidden {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: block !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-mb-2 {
+    margin-bottom: var(--mobile-spacing-sm) !important;
+  }
+  
+  .mobile-mb-3 {
+    margin-bottom: var(--mobile-spacing-md) !important;
+  }
+}
+
+/* Landscape phone optimizations */
+@media (max-width: 896px) and (orientation: landscape) and (max-height: 414px) {
+  .projector-timer,
+  .projector-time {
+    font-size: 1.5rem !important;
+    padding: var(--mobile-spacing-sm) !important;
+  }
+  
+  .container,
+  .container-fluid {
+    padding-top: var(--mobile-spacing-xs) !important;
+    padding-bottom: var(--mobile-spacing-xs) !important;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .projector-timer,
+  .projector-time {
+    font-size: 2.5rem !important;
+  }
+  
+  .projector-table {
+    font-size: 1.1rem !important;
+  }
+  
+  .projector-table th {
+    font-size: 1.2rem !important;
+    padding: 12px !important;
+  }
+}

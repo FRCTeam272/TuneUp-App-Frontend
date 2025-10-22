@@ -4,6 +4,7 @@ import { Button } from "react-bootstrap";
 import { settingsContext } from "../contexts/settingsContext";
 import { useSound } from "use-sound";
 import dingSound from '../../static/timerding.mp3'
+import "../mobile.css"
 export function minutesToSeconds(time){
     if(time.includes(":")){
       const [min, second] = time.split(":");

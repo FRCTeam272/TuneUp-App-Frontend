@@ -1,8 +1,9 @@
 import React from "react"
 import { useContext, useEffect, useState } from "react";
-import { Table, Button } from "react-bootstrap";
+import { Table, Button, Card } from "react-bootstrap";
 import { navigate } from "gatsby";
 import { settingsContext } from "../contexts/settingsContext";
+import "../mobile.css";
 
 export default function ScoreTable({teamData, refreshData}){
     const [mutapleTeamData, setMutapleTeamData] = useState([...teamData])
@@ -86,38 +87,90 @@ export default function ScoreTable({teamData, refreshData}){
         navigate(`/team/${teamNumber}`);
     };
 
+    const displayData = mutapleTeamData.slice(mapIndex, mapIndex + size);
+
     return <>
-        <Table striped bordered className="projector-table">
-            <thead>
-                <tr>
-                    <th>Place</th>
-                    <th>Team Number</th>
-                    <th>Team Name</th>
-                    <th>Scores</th>
-                    <th>{divisorHeader}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                mutapleTeamData.map((item, index) => {
-                    return <tr key={index}>
-                        <td>{item['place']}</td>
-                        <td>
-                            <Button 
-                                variant="link" 
-                                className="team-number-link"
-                                onClick={() => handleTeamClick(item['number'])}
-                                title={`View details for Team #${item['number']}`}
-                            >
-                                #{item['number']}
-                            </Button>
-                        </td>
-                        <td>{item['name']}</td>
-                        <td>{item['scores']}</td>
-                        <td>{item["displayAverage"]}</td>
+        {/* Desktop/Tablet Table View */}
+        <div className="mobile-table-wrapper">
+            <Table striped bordered className="projector-table">
+                <thead>
+                    <tr>
+                        <th>Place</th>
+                        <th>Team Number</th>
+                        <th>Team Name</th>
+                        <th>Scores</th>
+                        <th>{divisorHeader}</th>
                     </tr>
-                }).splice(mapIndex, size)}
-            </tbody>
-        </Table>
+                </thead>
+                <tbody>
+                    {displayData.map((item, index) => {
+                        return <tr key={index}>
+                            <td>{item['place']}</td>
+                            <td>
+                                <Button 
+                                    variant="link" 
+                                    className="team-number-link"
+                                    onClick={() => handleTeamClick(item['number'])}
+                                    title={`View details for Team #${item['number']}`}
+                                >
+                                    #{item['number']}
+                                </Button>
+                            </td>
+                            <td>{item['name']}</td>
+                            <td>{item['scores']}</td>
+                            <td>{item["displayAverage"]}</td>
+                        </tr>
+                    })}
+                </tbody>
+            </Table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="mobile-card-view">
+            {displayData.map((item, index) => {
+                const rankClass = item.place <= 3 ? `rank-${item.place}` : '';
+                return (
+                    <Card key={index} className={`mobile-team-card ${rankClass}`}>
+                        <Card.Body>
+                            <div className="mobile-team-header">
+                                <div>
+                                    <h3 className="mobile-team-number">#{item.number}</h3>
+                                    <div className="mobile-team-name">{item.name}</div>
+                                </div>
+                                <div className="mobile-team-rank">#{item.place}</div>
+                            </div>
+                            
+                            <div className="mobile-team-stats">
+                                <div className="mobile-stat">
+                                    <div className="mobile-stat-label">Average Score</div>
+                                    <div className="mobile-stat-value">{item.displayAverage}</div>
+                                </div>
+                                <div className="mobile-stat">
+                                    <div className="mobile-stat-label">Total Scores</div>
+                                    <div className="mobile-stat-value">{item.scores ? item.scores.split(',').length : 0}</div>
+                                </div>
+                            </div>
+                            
+                            <div className="mobile-team-stats" style={{gridTemplateColumns: '1fr'}}>
+                                <div className="mobile-stat">
+                                    <div className="mobile-stat-label">Recent Scores</div>
+                                    <div className="mobile-stat-value" style={{fontSize: '0.9rem', wordBreak: 'break-all'}}>
+                                        {item.scores ? item.scores.split(',').slice(-3).join(', ') + (item.scores.split(',').length > 3 ? '...' : '') : 'None'}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <Button
+                                variant="outline-primary"
+                                className="mobile-team-button"
+                                onClick={() => handleTeamClick(item['number'])}
+                            >
+                                View Team Details
+                            </Button>
+                        </Card.Body>
+                    </Card>
+                );
+            })}
+        </div>
     </>
 }
