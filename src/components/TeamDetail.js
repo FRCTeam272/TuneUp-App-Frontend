@@ -1,18 +1,23 @@
+import { navigate } from 'gatsby';
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Row, Col, ProgressBar } from 'react-bootstrap';
 
-const TeamDetail = ({ teamData, divisor = 3 }) => {
+const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
     const [processedData, setProcessedData] = useState({});
 
     useEffect(() => {
         if (teamData) {
             console.log('TeamData received:', teamData); // Debug log
+            console.log('RankingData received:', rankingData); // Debug log
             
             const scores = teamData.scores || [];
             const sortedScores = [...scores].sort((a, b) => b - a);
             const topScores = teamData.top_three_scores || sortedScores.slice(0, divisor);
             const average = teamData.average_top_three || 
                 (topScores.length > 0 ? topScores.reduce((a, b) => a + b, 0) / topScores.length : 0);
+            
+            // Find current team in ranking data
+            const currentTeamInRankings = findCurrentTeamInRankings(teamData.team_id, rankingData);
             
             const processed = {
                 teamNumber: teamData.team_id,
@@ -24,13 +29,14 @@ const TeamDetail = ({ teamData, divisor = 3 }) => {
                 highestScore: scores.length > 0 ? Math.max(...scores) : 0,
                 lowestScore: scores.length > 0 ? Math.min(...scores) : 0,
                 totalRounds: scores.length,
-                improvementTrend: calculateTrend(scores)
+                improvementTrend: calculateTrend(scores),
+                currentTeamRankingInfo: currentTeamInRankings
             };
             
             console.log('Processed data:', processed); // Debug log
             setProcessedData(processed);
         }
-    }, [teamData, divisor]);
+    }, [teamData, divisor, rankingData]);
 
     const calculateTrend = (scores) => {
         if (scores.length < 2) return 'insufficient-data';
@@ -48,6 +54,67 @@ const TeamDetail = ({ teamData, divisor = 3 }) => {
         if (improvement > 10) return 'improving';
         if (improvement < -10) return 'declining';
         return 'stable';
+    };
+
+    const findCurrentTeamInRankings = (teamId, rankings) => {
+        if (!rankings || !Array.isArray(rankings) || rankings.length === 0) {
+            return null;
+        }
+        
+        // Sort rankings by average score (descending) to get proper ranking positions
+        const sortedRankings = [...rankings].sort((a, b) => {
+            const avgA = a.average_top_three || 0;
+            const avgB = b.average_top_three || 0;
+            return avgB - avgA;
+        });
+        
+        // Find the current team's position
+        const teamIndex = sortedRankings.findIndex(team => team.team_id === teamId);
+        
+        if (teamIndex === -1) return null; // Team not found in rankings
+        
+        const currentTeam = sortedRankings[teamIndex];
+        
+        // Get nearby teams (2 above and 2 below)
+        const nearbyTeams = [];
+        
+        // Calculate range for nearby teams
+        let startIndex = Math.max(0, teamIndex - 2);
+        let endIndex = Math.min(sortedRankings.length - 1, teamIndex + 2);
+        
+        // Adjust range to ensure we get 4 teams when possible
+        const totalNeeded = 4;
+        const currentRange = endIndex - startIndex + 1 - 1; // -1 to exclude current team
+        
+        if (currentRange < totalNeeded && sortedRankings.length > totalNeeded) {
+            if (teamIndex < 2) {
+                // Near the top, extend downward
+                endIndex = Math.min(sortedRankings.length - 1, startIndex + totalNeeded);
+            } else if (teamIndex > sortedRankings.length - 3) {
+                // Near the bottom, extend upward
+                startIndex = Math.max(0, endIndex - totalNeeded);
+            }
+        }
+        
+        // Collect nearby teams with their ranking info, INCLUDING the current team
+        const allTeamsInRange = [];
+        for (let i = startIndex; i <= endIndex; i++) {
+            const team = {
+                ...sortedRankings[i],
+                rank: i + 1,
+                isCurrent: i === teamIndex,
+                isAbove: i < teamIndex,
+                isBelow: i > teamIndex
+            };
+            allTeamsInRange.push(team);
+        }
+        
+        return {
+            ...currentTeam,
+            rank: teamIndex + 1,
+            totalTeams: sortedRankings.length,
+            nearbyTeams: allTeamsInRange
+        };
     };
 
     const getTrendBadge = (trend) => {
@@ -125,6 +192,109 @@ const TeamDetail = ({ teamData, divisor = 3 }) => {
                     </Row>
                 </Card.Body>
             </Card>
+
+            {/* Nearby Teams in Rankings */}
+            {processedData.currentTeamRankingInfo && processedData.currentTeamRankingInfo.nearbyTeams && processedData.currentTeamRankingInfo.nearbyTeams.length > 0 && (
+                <Card className="mb-4 projector-card">
+                    <Card.Header className="projector-card-header">
+                        <h3 className="mb-0">📊 Nearby Teams in Rankings</h3>
+                    </Card.Header>
+                    <Card.Body className="projector-card-body">
+                        <Table className="projector-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Team #</th>
+                                    <th>Team Name</th>
+                                    <th>Average Score</th>
+                                    <th>Score Gap</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {processedData.currentTeamRankingInfo.nearbyTeams
+                                    .sort((a, b) => a.rank - b.rank) // Sort by rank to maintain order
+                                    .map((team, index) => {
+                                    const scoreDiff = (team.average_top_three || 0) - (processedData.currentTeamRankingInfo.average_top_three || 0);
+                                    const isAbove = team.isAbove;
+                                    const isBelow = team.isBelow;
+                                    const isCurrent = team.isCurrent;
+                                    
+                                    return (
+                                        <tr 
+                                            key={team.team_id}
+                                            className={isCurrent ? 'table-primary' : ''}
+                                            style={isCurrent ? { 
+                                                fontWeight: 'bold',
+                                                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                                                border: '2px solid #0d6efd'
+                                            } : {}}
+                                        >
+                                            <td>
+                                                <Badge 
+                                                    bg={
+                                                        isCurrent ? 'primary' :
+                                                        team.rank <= 3 ? 'warning' : 
+                                                        team.rank <= 10 ? 'info' : 'secondary'
+                                                    }
+                                                    className="rank-badge"
+                                                >
+                                                    #{team.rank}
+                                                </Badge>
+                                                {isCurrent && <small className="ms-2 text-primary">← YOU</small>}
+                                            </td>
+                                            <td>
+                                                <strong 
+                                                    onClick={() => !isCurrent && navigate(`/team/${team.team_id}`)}
+                                                    style={!isCurrent ? { cursor: 'pointer' } : {}}
+                                                >
+                                                    Team {team.team_id}
+                                                </strong>
+                                                {isCurrent && <small className="ms-2 text-muted">(Current Team)</small>}
+                                            </td>
+                                            <td>
+                                                <span className={
+                                                    isCurrent ? 'text-primary' : 'team-name'
+                                                }>
+                                                    {team.team_name || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={
+                                                    isCurrent ? 'text-primary' :
+                                                    isAbove ? 'text-success' : 
+                                                    isBelow ? 'text-danger' : 'text-muted'
+                                                }>
+                                                    <strong>{(team.average_top_three || 0).toFixed(1)}</strong>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {isCurrent ? (
+                                                    <span className="text-muted">—</span>
+                                                ) : (
+                                                    <span className={isAbove ? 'text-success' : 'text-danger'}>
+                                                        {isAbove ? '+' : ''}{scoreDiff.toFixed(1)}
+                                                        <small className="ms-1">
+                                                            {isAbove ? '↑' : '↓'}
+                                                        </small>
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </Table>
+                        <div className="mt-3">
+                            <small className="text-muted">
+                                <strong>Score Gap:</strong> Difference between their average score and your current average ({(processedData.currentTeamRankingInfo.average_top_three || 0).toFixed(1)})
+                                <br />
+                                <strong>Green (↑):</strong> Teams performing better than you
+                                <strong className="ms-3">Red (↓):</strong> Teams performing below you
+                            </small>
+                        </div>
+                    </Card.Body>
+                </Card>
+            )}
 
             {/* Score History Table */}
             <Card className="mb-4 projector-card">
