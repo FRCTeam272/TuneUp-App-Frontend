@@ -22,6 +22,7 @@ const TeamPage = ({ params }) => {
     }, [])
     
     const [teamData, setTeamData] = useState(null);
+    const [rankingData, setRankingData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isPasswordValid, setIsPasswordValid] = useState(false);
@@ -72,6 +73,7 @@ const TeamPage = ({ params }) => {
                 
                 // Get the team data using the display API
                 const data = await displayApiClient.getDisplayById(teamId);
+                const master_display = await displayApiClient.getDisplay();
                 console.log('API Response:', data); // Debug log
                 console.log('Data type:', typeof data); // Debug log
                 console.log('Data length:', Array.isArray(data) ? data.length : 'Not an array'); // Debug log
@@ -86,6 +88,8 @@ const TeamPage = ({ params }) => {
                     console.log('No data found for team:', teamId); // Debug log
                     setError(`Team #${teamId} not found. This team may not exist or may not have any scores yet.`);
                 }
+
+                setRankingData(master_display);
             } catch (err) {
                 console.error('Error fetching team data:', err);
                 let errorMessage = `Failed to load team data`;
@@ -313,6 +317,7 @@ const TeamPage = ({ params }) => {
                             <TeamDetail 
                                 teamData={teamData} 
                                 divisor={settings.divisor}
+                                rankingData={rankingData}
                             />
                         )}
                         {!teamData && !loading && !error && (

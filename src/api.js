@@ -44,6 +44,11 @@ export class Team_API_Client {
         return fetch(`${this.base_url}rename`, this.getDefaultOptions("POST", { team_id, name, password }))
             .then((response) => response.json());
     }
+
+    getRanks(){
+        return fetch(`${this.base_url}get_ranks`, this.getDefaultOptions("GET"))
+            .then((response) => response.json());
+    }
 }
 
 export class Score_API_Client {
