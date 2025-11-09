@@ -1,5 +1,5 @@
 export class Team_API_Client {
-    base_url = process.env.GATSBY_BACKEND_URL + "/team/";
+    base_url = (process.env.GATSBY_BACKEND_URL || 'https://tuneup-backend-7cb9db42de78.herokuapp.com') + "/team/";
 
     // Default fetch options with CORS support
     getDefaultOptions(method = "GET", body = null) {
@@ -52,7 +52,7 @@ export class Team_API_Client {
 }
 
 export class Score_API_Client {
-    base_url = process.env.GATSBY_BACKEND_URL + "/score/";
+    base_url = (process.env.GATSBY_BACKEND_URL || 'https://tuneup-backend-7cb9db42de78.herokuapp.com') + "/score/";
 
     // Default fetch options with CORS support
     getDefaultOptions(method = "GET", body = null) {
@@ -90,7 +90,7 @@ export class Score_API_Client {
 }
 
 export class Display_API_Client {
-    base_url = process.env.GATSBY_BACKEND_URL + "/display/";
+    base_url = (process.env.GATSBY_BACKEND_URL || 'https://tuneup-backend-7cb9db42de78.herokuapp.com') + "/display/";
 
     // Default fetch options with CORS support
     getDefaultOptions(method = "GET", body = null) {

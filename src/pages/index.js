@@ -15,12 +15,21 @@ const IndexPage = () => {
     const [password, setPassword] = useState('');
 
     useEffect(() => {
-        const storedPassword = localStorage.getItem('displayPassword') || '';
-        setPassword(storedPassword);
+        // Only access localStorage on the client side
+        if (typeof window !== 'undefined') {
+            const storedPassword = localStorage.getItem('displayPassword') || '';
+            setPassword(storedPassword);
+        }
     }, []);
 
     // Check password validity on component mount
     useEffect(() => {
+        // Only run on client side to avoid SSR issues
+        if (typeof window === 'undefined') {
+            setPasswordChecked(true);
+            return;
+        }
+
         const checkPassword = async () => {
             if (password) {
                 try {

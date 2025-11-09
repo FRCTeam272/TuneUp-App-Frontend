@@ -1,4 +1,10 @@
 import React from "react"
+import ErrorBoundary from './src/components/ErrorBoundary';
+
+// Wrap the root element with ErrorBoundary for SSR
+export const wrapRootElement = ({ element }) => (
+  <ErrorBoundary>{element}</ErrorBoundary>
+);
 
 export const onRenderBody = ({ setHeadComponents }) => {
   setHeadComponents([
