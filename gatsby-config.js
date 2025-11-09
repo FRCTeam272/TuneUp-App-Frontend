@@ -21,10 +21,10 @@ module.exports = {
   siteMetadata: {
     title: "FLL Scoreboard",
     description: "FLL (First Lego League) Scoreboard Application",
-    siteUrl: "http://localhost:8000"
+    siteUrl: process.env.GATSBY_SITE_URL || "https://your-netlify-site.netlify.app"
   },
   flags: {
-    DEV_SSR: true // Enable SSR in development
+    DEV_SSR: isDevelopment // Only enable SSR in development
   },
   plugins: [
     "gatsby-plugin-styled-components",

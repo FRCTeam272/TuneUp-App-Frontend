@@ -1,0 +1,24 @@
+[build]
+  publish = "public"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  GATSBY_BACKEND_URL = "https://tuneup-backend-7cb9db42de78.herokuapp.com"
+  GATSBY_TIMER = "2:30"
+  GATSBY_SHOW_FORM = "false"
+  GATSBY_DIVISOR = "3"
+  GATSBY_CORS_ENABLED = "true"
+
+# Handle client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Handle API calls - proxy to backend during runtime
+[[redirects]]
+  from = "/api/*"
+  to = "https://tuneup-backend-7cb9db42de78.herokuapp.com/:splat"
+  status = 200
+  force = false
