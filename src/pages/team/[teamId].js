@@ -5,6 +5,7 @@ import { settingsContext } from '../../contexts/settingsContext';
 import { Display_API_Client, Team_API_Client, Score_API_Client} from '../../api';
 import TeamDetail from '../../components/TeamDetail';
 import TeamEditControls from '../../components/TeamEditControls';
+import Schedule from '../../components/Schedule';
 import '../../App.css';
 
 const TeamPage = ({ params }) => {
@@ -27,6 +28,7 @@ const TeamPage = ({ params }) => {
     const [error, setError] = useState(null);
     const [isPasswordValid, setIsPasswordValid] = useState(false);
     const [passwordChecked, setPasswordChecked] = useState(false);
+    const [scheduleData, setScheduleData] = useState(null);
     
     const displayApiClient = new Display_API_Client();
     const team_client = new Team_API_Client();
@@ -55,6 +57,21 @@ const TeamPage = ({ params }) => {
 
         checkPassword();
     }, [settings.password]);
+
+    useEffect(() => {
+        const fetchScheduleData = async () => {
+            try {
+                console.log('Fetching schedule data...');
+                const data = await team_client.getSchedule(teamId);
+                console.log('Schedule data:', data);
+                setScheduleData(data);
+            } catch (err) {
+                console.error('Error fetching schedule data:', err);
+            }
+        };
+
+        fetchScheduleData();
+    }, [teamId]);
 
     useEffect(() => {
         const fetchTeamData = async () => {
@@ -309,6 +326,13 @@ const TeamPage = ({ params }) => {
                                 onAddScore={handleAddScore}
                                 onRemoveScore={handleRemoveScore}
                                 isPasswordValid={isPasswordValid}
+                            />
+                        )}
+                        
+                        {scheduleData && teamData && (
+                            <Schedule 
+                                scheduleData={scheduleData} 
+                                teamName={teamData.team_name || `Team #${teamId}`}
                             />
                         )}
                         
