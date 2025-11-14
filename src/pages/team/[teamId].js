@@ -333,6 +333,7 @@ const TeamPage = ({ params }) => {
                             <Schedule 
                                 scheduleData={scheduleData} 
                                 teamName={teamData.team_name || `Team #${teamId}`}
+                                roomNumber={teamData.room || 'TBD'}
                             />
                         )}
                         

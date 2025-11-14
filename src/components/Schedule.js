@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Table, Badge } from 'react-bootstrap';
 
-const Schedule = ({ scheduleData, teamName }) => {
+const Schedule = ({ scheduleData, teamName, roomNumber }) => {
     if (!scheduleData || !Array.isArray(scheduleData) || scheduleData.length === 0) {
         return (
             <Card className="mb-4">
@@ -63,6 +63,7 @@ const Schedule = ({ scheduleData, teamName }) => {
         <Card className="mb-4">
             <Card.Header>
                 <h4>📅 Schedule for {teamName}</h4>
+                <h5>Room {roomNumber}</h5>
             </Card.Header>
             <Card.Body>
                 <Table striped bordered hover responsive>
