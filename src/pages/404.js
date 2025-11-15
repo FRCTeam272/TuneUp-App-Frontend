@@ -6,7 +6,7 @@ import '../mobile.css';
 
 const NotFoundPage = () => {
   const handleGoHome = () => {
-    navigate('/');
+    navigate('/home');
   };
 
   const handleGoBack = () => {
