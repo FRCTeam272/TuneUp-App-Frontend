@@ -6,6 +6,7 @@ const RoomAssignments = ({ roomData }) => {
     const [showHidden, setShowHidden] = useState(false);
     const [judgeView, setJudgeView] = useState(false);
     const [selectedJudgeGroup, setSelectedJudgeGroup] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
     const [isClient, setIsClient] = useState(false);
 
     // Set client-side flag
@@ -21,6 +22,7 @@ const RoomAssignments = ({ roomData }) => {
                 const storedShowHidden = localStorage.getItem('showHiddenRoomTeams');
                 const storedJudgeView = localStorage.getItem('judgeViewMode');
                 const storedJudgeGroup = localStorage.getItem('selectedJudgeGroup');
+                const storedSearchTerm = localStorage.getItem('roomSearchTerm');
                 
                 if (storedHiddenTeams) {
                     try {
@@ -41,6 +43,10 @@ const RoomAssignments = ({ roomData }) => {
                 
                 if (storedJudgeGroup) {
                     setSelectedJudgeGroup(storedJudgeGroup);
+                }
+                
+                if (storedSearchTerm) {
+                    setSearchTerm(storedSearchTerm);
                 }
             }
         };
@@ -97,6 +103,20 @@ const RoomAssignments = ({ roomData }) => {
             localStorage.setItem('selectedJudgeGroup', selectedJudgeGroup);
         }
     }, [selectedJudgeGroup, isClient]);
+
+    // Save searchTerm preference to localStorage
+    useEffect(() => {
+        if (isClient && typeof window !== 'undefined') {
+            localStorage.setItem('roomSearchTerm', searchTerm);
+        }
+    }, [searchTerm, isClient]);
+
+    // Clear judge group filter when switching out of judge view
+    useEffect(() => {
+        if (!judgeView && selectedJudgeGroup !== 'all') {
+            setSelectedJudgeGroup('all');
+        }
+    }, [judgeView, selectedJudgeGroup]);
 
     if (!roomData || !Array.isArray(roomData) || roomData.length === 0) {
         return (
@@ -158,14 +178,28 @@ const RoomAssignments = ({ roomData }) => {
         .filter(group => group && group.trim() !== '')
     )].sort();
 
-    // Filter by judge group first, then by hidden teams
+    // Filter by judge group first, then by search term, then by hidden teams
     const judgeGroupFilteredData = selectedJudgeGroup === 'all' 
         ? sortedData 
         : sortedData.filter((assignment) => assignment.judge_group === selectedJudgeGroup);
 
+    // Apply search filter
+    const searchFilteredData = searchTerm.trim() === '' 
+        ? judgeGroupFilteredData
+        : judgeGroupFilteredData.filter((assignment) => {
+            const searchLower = searchTerm.toLowerCase();
+            return (
+                (assignment.team_name && assignment.team_name.toLowerCase().includes(searchLower)) ||
+                (assignment.team_id && assignment.team_id.toString().includes(searchLower)) ||
+                (assignment.room && assignment.room.toLowerCase().includes(searchLower)) ||
+                (assignment.judge_session && assignment.judge_session.toLowerCase().includes(searchLower)) ||
+                (assignment.judge_group && assignment.judge_group.toLowerCase().includes(searchLower))
+            );
+        });
+
     const visibleData = showHidden 
-        ? judgeGroupFilteredData 
-        : judgeGroupFilteredData.filter((assignment) => !hiddenTeams.has(assignment.team_id));
+        ? searchFilteredData 
+        : searchFilteredData.filter((assignment) => !hiddenTeams.has(assignment.team_id));
 
     const hiddenCount = hiddenTeams.size;
 
@@ -209,6 +243,33 @@ const RoomAssignments = ({ roomData }) => {
                                     </select>
                                 </div>
                             )}
+                            
+                            {/* Search Input */}
+                            <div className="d-flex align-items-center gap-2 flex-fill flex-sm-grow-0">
+                                <label htmlFor="room-search" className="text-nowrap small text-muted mb-0">
+                                    🔍
+                                </label>
+                                <input
+                                    id="room-search"
+                                    type="text"
+                                    className="form-control form-control-sm"
+                                    placeholder="Search teams, rooms..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    style={{minHeight: '36px', minWidth: '180px'}}
+                                />
+                                {searchTerm && (
+                                    <Button
+                                        variant="outline-secondary"
+                                        size="sm"
+                                        onClick={() => setSearchTerm('')}
+                                        title="Clear search"
+                                        style={{minHeight: '36px', padding: '0 8px'}}
+                                    >
+                                        ✕
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                         
                         <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 w-100 w-lg-auto">
@@ -399,6 +460,7 @@ const RoomAssignments = ({ roomData }) => {
                     <Card.Footer className="text-muted small">
                         Showing {visibleData.length} of {sortedData.length} assignments
                         {selectedJudgeGroup !== 'all' && judgeView && ` (filtered to Judge Group ${selectedJudgeGroup})`}
+                        {searchTerm && ` (search: "${searchTerm}")`}
                         {hiddenCount > 0 && ` (${hiddenCount} hidden)`}
                         {judgeView && (
                             <span className="ms-3">
