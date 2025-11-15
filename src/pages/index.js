@@ -6,7 +6,7 @@ const IndexPage = () => {
     navigate('/home');
   }, []);
 
-  return null; // This page will redirect immediately
+  return <>Redirecting...</>; // This page will redirect immediately
 };
 
 export default IndexPage;
