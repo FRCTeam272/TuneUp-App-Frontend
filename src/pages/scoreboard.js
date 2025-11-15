@@ -91,13 +91,20 @@ const ScoreboardPage = () => {
                     <FloatChild style={{ width: `${offset}%` }}>
                         <ScoreTable teamData={teamData} refreshData={refreshData}></ScoreTable>
                         <br />
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 flex-wrap">
                             <Button 
                                 className="projector-button" 
                                 variant="outline-primary"
                                 onClick={() => navigate('/')}
                             >
                                 🏠 Main Menu
+                            </Button>
+                            <Button 
+                                className="projector-button" 
+                                variant="outline-info"
+                                onClick={() => navigate('/schedule')}
+                            >
+                                📅 Schedule
                             </Button>
                             <Settings></Settings>
                             <Button className="projector-button" onClick={handleAdminClick}>
@@ -130,6 +137,13 @@ const ScoreboardPage = () => {
                                     onClick={() => navigate('/')}
                                 >
                                     🏠 Main Menu
+                                </Button>
+                                <Button 
+                                    className="projector-button" 
+                                    variant="outline-info"
+                                    onClick={() => navigate('/schedule')}
+                                >
+                                    📅 Schedule
                                 </Button>
                                 <div className="d-flex gap-2">
                                     <Settings></Settings>

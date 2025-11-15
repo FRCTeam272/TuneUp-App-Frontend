@@ -178,6 +178,13 @@ const AdminPage = ({ serverData }) => {
                                 </Button>
                                 <Button 
                                     className="projector-button" 
+                                    variant="outline-info"
+                                    onClick={() => navigate('/schedule')}
+                                >
+                                    📅 Schedule
+                                </Button>
+                                <Button 
+                                    className="projector-button" 
                                     onClick={handleBackToScoreboard}
                                 >
                                     ← Back to Scoreboard

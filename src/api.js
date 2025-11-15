@@ -131,3 +131,31 @@ export class Display_API_Client {
             .then((response) => response.json());
     }
 }
+
+export class Schedule_API_Client {
+    base_url = (process.env.GATSBY_BACKEND_URL || 'https://tuneup-backend-7cb9db42de78.herokuapp.com') + "/schedule";
+
+    // Default fetch options with CORS support
+    getDefaultOptions(method = "GET", body = null) {
+        const options = {
+            method,
+            mode: 'cors', // Enable CORS
+            credentials: 'omit', // Don't send cookies for cross-origin requests
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+        };
+        
+        if (body) {
+            options.body = JSON.stringify(body);
+        }
+        
+        return options;
+    }
+
+    getSchedule() {
+        return fetch(this.base_url, this.getDefaultOptions("GET"))
+            .then((response) => response.json());
+    }
+}
