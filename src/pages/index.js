@@ -64,6 +64,12 @@ const IndexPage = () => {
             variant: 'info'
         },
         {
+            title: '🏠 Room Assignments',
+            description: 'View room assignments and judging orders',
+            path: '/rooms',
+            variant: 'success'
+        },
+        {
             title: isPasswordValid ? '⚙️ Admin Panel' : '📋 Score Listing',
             description: isPasswordValid ? 'Manage teams, add/remove scores, and administrative functions' : 'View a list of all teams and their scores',
             path: '/admin',
@@ -104,7 +110,7 @@ const IndexPage = () => {
                     
                     <Row className="g-3 g-md-4">
                         {menuItems.map((item, index) => (
-                            <Col key={index} xs={12} sm={6} lg={4}>
+                            <Col key={index} xs={12} sm={6} lg={6} xl={3}>
                                 <Card className="h-100 shadow-sm">
                                     <Card.Body className="d-flex flex-column text-center p-4">
                                         <Card.Title className="h3 mb-3">

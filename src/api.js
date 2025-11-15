@@ -158,4 +158,9 @@ export class Schedule_API_Client {
         return fetch(this.base_url, this.getDefaultOptions("GET"))
             .then((response) => response.json());
     }
+
+    getRooms() {
+        return fetch(`${this.base_url}/rooms`, this.getDefaultOptions("GET"))
+            .then((response) => response.json());
+    }
 }
