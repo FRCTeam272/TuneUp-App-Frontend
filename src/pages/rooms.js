@@ -168,12 +168,12 @@ const RoomsPage = ({ location }) => {
     };
 
     return (
-        <Container fluid className="py-3">
+        <Container fluid className="py-2 py-md-3 px-2 px-md-3">
             {/* Header */}
             <Row className="mb-4">
                 <Col xs={12}>
-                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                        <div>
+                    <div className="d-flex flex-column gap-3">
+                        <div className="text-center text-md-start">
                             <h1 className="display-6 mb-1">🏠 Room Assignments</h1>
                             {lastUpdated && (
                                 <small className="text-muted">
@@ -192,15 +192,17 @@ const RoomsPage = ({ location }) => {
                             <Button 
                                 variant="outline-primary"
                                 onClick={handleBackToMenu}
-                                className="projector-button"
+                                className="projector-button d-flex align-items-center justify-content-center"
+                                style={{minHeight: '44px'}}
                             >
                                 🏠 Main Menu
                             </Button>
                             <Button 
                                 variant="outline-info"
                                 onClick={handleCopyShareUrl}
-                                className="projector-button"
+                                className="projector-button d-flex align-items-center justify-content-center"
                                 title="Copy shareable URL for room assignments"
+                                style={{minHeight: '44px'}}
                             >
                                 🔗 Share View
                             </Button>
@@ -208,7 +210,8 @@ const RoomsPage = ({ location }) => {
                                 variant="primary"
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="projector-button"
+                                className="projector-button d-flex align-items-center justify-content-center"
+                                style={{minHeight: '44px'}}
                             >
                                 {loading ? (
                                     <>
@@ -229,12 +232,20 @@ const RoomsPage = ({ location }) => {
                 <Row className="mb-4">
                     <Col xs={12}>
                         <Alert variant="info" dismissible onClose={() => setShowShareUrl(false)}>
-                            <Alert.Heading className="h6 mb-2">📋 Shareable URL (copied to clipboard)</Alert.Heading>
-                            <div className="small text-break" style={{fontFamily: 'monospace', backgroundColor: '#f8f9fa', padding: '8px', borderRadius: '4px'}}>
+                            <Alert.Heading className="h6 mb-2 text-center text-sm-start">📋 Shareable URL (copied to clipboard)</Alert.Heading>
+                            <div className="small text-break mb-2" style={{
+                                fontFamily: 'monospace', 
+                                backgroundColor: '#f8f9fa', 
+                                padding: '12px', 
+                                borderRadius: '8px',
+                                wordBreak: 'break-all',
+                                fontSize: '0.8rem',
+                                lineHeight: '1.4'
+                            }}>
                                 {generateShareUrl()}
                             </div>
                             <hr className="my-2" />
-                            <small className="text-muted">
+                            <small className="text-muted" style={{lineHeight: '1.4'}}>
                                 {generateShareUrl()?.includes('hide=') ? (
                                     <>Share this URL to show the room assignments with your current hidden teams. 
                                     The URL will automatically hide the same teams for anyone who visits it.</>
@@ -283,9 +294,9 @@ const RoomsPage = ({ location }) => {
             {!loading && roomData.length > 0 && (
                 <Row className="mt-4">
                     <Col xs={12}>
-                        <div className="text-center">
-                            <small className="text-muted">
-                                💡 Tips: Use the "Hide" button to hide teams you don't want to see. 
+                        <div className="text-center p-3 bg-light rounded">
+                            <small className="text-muted" style={{lineHeight: '1.5'}}>
+                                💡 <strong>Tips:</strong> Use the "Hide" button to hide teams you don't want to see. 
                                 Switch between Room View and Judge View using the toggle button. 
                                 Hidden teams are remembered and can be shared via URL.
                             </small>

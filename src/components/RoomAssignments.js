@@ -148,30 +148,29 @@ const RoomAssignments = ({ roomData }) => {
     return (
         <Container fluid>
             <Card className="mb-4">
-                <Card.Header className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-                    <h4 className="mb-0">
+                <Card.Header className="d-flex flex-column gap-3">
+                    <h4 className="mb-0 text-center text-md-start">
                         {judgeView ? '⚖️ Judge Assignments' : '🏠 Room Assignments'}
                     </h4>
-                    <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
-                        <div className="d-flex align-items-center gap-2">
+                    <div className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3">
+                        <div className="d-flex align-items-center gap-2 w-100 w-lg-auto">
                             <Button
                                 variant={judgeView ? "primary" : "outline-primary"}
                                 size="sm"
                                 onClick={() => setJudgeView(!judgeView)}
-                                className="text-nowrap"
+                                className="text-nowrap flex-fill flex-lg-grow-0"
+                                style={{minHeight: '44px'}}
                             >
                                 {judgeView ? '⚖️ Judge View' : '🏠 Room View'}
                             </Button>
                         </div>
                         
-                        <div className="d-flex align-items-center gap-3">
+                        <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 w-100 w-lg-auto">
                             {hiddenCount > 0 && (
-                                <Badge bg="secondary">
-                                    {hiddenCount} hidden
-                                </Badge>
-                            )}
-                            {hiddenCount > 0 && (
-                                <>
+                                <div className="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-between justify-content-sm-start">
+                                    <Badge bg="secondary" className="px-2 py-1">
+                                        {hiddenCount} hidden
+                                    </Badge>
                                     <Form.Check 
                                         type="switch"
                                         id="show-hidden-teams-switch"
@@ -179,19 +178,25 @@ const RoomAssignments = ({ roomData }) => {
                                         checked={showHidden}
                                         onChange={(e) => setShowHidden(e.target.checked)}
                                         aria-label="Toggle visibility of hidden teams"
+                                        className="mb-0"
+                                        style={{minHeight: '44px', display: 'flex', alignItems: 'center'}}
                                     />
-                                    <Button
-                                        variant="outline-warning"
-                                        size="sm"
-                                        onClick={() => {
-                                            setHiddenTeams(new Set());
-                                            setShowHidden(false);
-                                        }}
-                                        title="Clear all hidden teams"
-                                    >
-                                        Clear All
-                                    </Button>
-                                </>
+                                </div>
+                            )}
+                            {hiddenCount > 0 && (
+                                <Button
+                                    variant="outline-warning"
+                                    size="sm"
+                                    onClick={() => {
+                                        setHiddenTeams(new Set());
+                                        setShowHidden(false);
+                                    }}
+                                    title="Clear all hidden teams"
+                                    className="w-100 w-sm-auto"
+                                    style={{minHeight: '44px'}}
+                                >
+                                    Clear All
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -199,75 +204,149 @@ const RoomAssignments = ({ roomData }) => {
                 <Card.Body className="p-0">
                     {visibleData.length === 0 ? (
                         <div className="p-4">
-                            <p className="text-muted mb-0">
+                            <p className="text-muted mb-0 text-center">
                                 {hiddenCount > 0 ? 'All teams are hidden. Toggle "Show hidden" to view them.' : 'No assignments to display.'}
                             </p>
                         </div>
                     ) : (
-                        <Table responsive striped hover className="mb-0">
-                            <thead className="table-dark">
-                                <tr>
-                                    <th>Team</th>
-                                    <th>Room</th>
-                                    {judgeView && (
-                                        <>
-                                            <th>Judge Session</th>
-                                            <th>Judge Group</th>
-                                        </>
-                                    )}
-                                    <th style={{width: '100px'}}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <>
+                            {/* Desktop Table View */}
+                            <div className="d-none d-md-block">
+                                <Table responsive striped hover className="mb-0">
+                                    <thead className="table-dark">
+                                        <tr>
+                                            <th>Team</th>
+                                            <th>Room</th>
+                                            {judgeView && (
+                                                <>
+                                                    <th>Judge Session</th>
+                                                    <th>Judge Group</th>
+                                                </>
+                                            )}
+                                            <th style={{width: '100px'}}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {visibleData.map((assignment, index) => {
+                                            const isHidden = hiddenTeams.has(assignment.team_id);
+                                            const teamKey = `${assignment.team_id}-${assignment.room}`;
+                                            
+                                            return (
+                                                <tr key={teamKey} className={isHidden && showHidden ? 'table-secondary opacity-50' : ''}>
+                                                    <td>
+                                                        <div>
+                                                            <div className="fw-bold text-primary">
+                                                                {assignment.team_name || `Team ${assignment.team_id}`}
+                                                            </div>
+                                                            <div className="text-muted small">
+                                                                #{assignment.team_id}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span className="badge bg-info text-dark">
+                                                            {assignment.room || 'TBD'}
+                                                        </span>
+                                                    </td>
+                                                    {judgeView && (
+                                                        <>
+                                                            <td>
+                                                                <span className="badge bg-warning text-dark">
+                                                                    {assignment.judge_session || 'TBD'}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span className="badge bg-success">
+                                                                    {assignment.judge_group || 'TBD'}
+                                                                </span>
+                                                            </td>
+                                                        </>
+                                                    )}
+                                                    <td className="text-center">
+                                                        <Button
+                                                            variant={isHidden ? "outline-success" : "outline-secondary"}
+                                                            size="sm"
+                                                            onClick={() => toggleTeamVisibility(assignment.team_id)}
+                                                        >
+                                                            {isHidden ? "Show" : "Hide"}
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </Table>
+                            </div>
+
+                            {/* Mobile Card View */}
+                            <div className="d-block d-md-none p-3">
                                 {visibleData.map((assignment, index) => {
                                     const isHidden = hiddenTeams.has(assignment.team_id);
                                     const teamKey = `${assignment.team_id}-${assignment.room}`;
                                     
                                     return (
-                                        <tr key={teamKey} className={isHidden && showHidden ? 'table-secondary opacity-50' : ''}>
-                                            <td>
-                                                <div>
-                                                    <div className="fw-bold text-primary">
+                                        <div key={teamKey} className={`mobile-team-card ${isHidden && showHidden ? 'opacity-50' : ''}`} style={{
+                                            background: 'white',
+                                            border: '2px solid #dee2e6',
+                                            borderRadius: '12px',
+                                            padding: '1rem',
+                                            marginBottom: '1rem',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                        }}>
+                                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                                <div className="flex-grow-1">
+                                                    <h6 className="fw-bold text-primary mb-1">
                                                         {assignment.team_name || `Team ${assignment.team_id}`}
-                                                    </div>
-                                                    <div className="text-muted small">
-                                                        #{assignment.team_id}
+                                                    </h6>
+                                                    <div className="text-muted small mb-2">
+                                                        Team #{assignment.team_id}
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <span className="badge bg-info text-dark">
-                                                    {assignment.room || 'TBD'}
-                                                </span>
-                                            </td>
-                                            {judgeView && (
-                                                <>
-                                                    <td>
-                                                        <span className="badge bg-warning text-dark">
-                                                            {assignment.judge_session || 'TBD'}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span className="badge bg-success">
-                                                            {assignment.judge_group || 'TBD'}
-                                                        </span>
-                                                    </td>
-                                                </>
-                                            )}
-                                            <td className="text-center">
                                                 <Button
                                                     variant={isHidden ? "outline-success" : "outline-secondary"}
                                                     size="sm"
                                                     onClick={() => toggleTeamVisibility(assignment.team_id)}
+                                                    style={{minHeight: '36px', minWidth: '60px'}}
                                                 >
                                                     {isHidden ? "Show" : "Hide"}
                                                 </Button>
-                                            </td>
-                                        </tr>
+                                            </div>
+                                            
+                                            <div className="row g-2">
+                                                <div className="col-6">
+                                                    <div className="text-center p-2" style={{background: '#f8f9fa', borderRadius: '6px'}}>
+                                                        <div className="small text-muted mb-1">Room</div>
+                                                        <span className="badge bg-info text-dark">
+                                                            {assignment.room || 'TBD'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {judgeView && (
+                                                    <>
+                                                        <div className="col-6">
+                                                            <div className="text-center p-2" style={{background: '#f8f9fa', borderRadius: '6px'}}>
+                                                                <div className="small text-muted mb-1">Session</div>
+                                                                <span className="badge bg-warning text-dark">
+                                                                    {assignment.judge_session || 'TBD'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-12">
+                                                            <div className="text-center p-2" style={{background: '#f8f9fa', borderRadius: '6px'}}>
+                                                                <div className="small text-muted mb-1">Judge Group</div>
+                                                                <span className="badge bg-success">
+                                                                    {assignment.judge_group || 'TBD'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     );
                                 })}
-                            </tbody>
-                        </Table>
+                            </div>
+                        </>
                     )}
                 </Card.Body>
                 {sortedData.length > 0 && (
