@@ -12,30 +12,55 @@ const RoomAssignments = ({ roomData }) => {
         setIsClient(true);
     }, []);
 
-    // Load preferences from localStorage on component mount
+    // Load preferences from localStorage on component mount and listen for storage events
     useEffect(() => {
-        if (isClient && typeof window !== 'undefined') {
-            const storedHiddenTeams = localStorage.getItem('hiddenRoomTeams');
-            const storedShowHidden = localStorage.getItem('showHiddenRoomTeams');
-            const storedJudgeView = localStorage.getItem('judgeViewMode');
-            
-            if (storedHiddenTeams) {
-                try {
-                    const hiddenArray = JSON.parse(storedHiddenTeams);
-                    setHiddenTeams(new Set(hiddenArray));
-                } catch (error) {
-                    console.error('Error parsing stored hidden teams:', error);
+        const loadFromStorage = () => {
+            if (isClient && typeof window !== 'undefined') {
+                const storedHiddenTeams = localStorage.getItem('hiddenRoomTeams');
+                const storedShowHidden = localStorage.getItem('showHiddenRoomTeams');
+                const storedJudgeView = localStorage.getItem('judgeViewMode');
+                
+                if (storedHiddenTeams) {
+                    try {
+                        const hiddenArray = JSON.parse(storedHiddenTeams);
+                        setHiddenTeams(new Set(hiddenArray));
+                    } catch (error) {
+                        console.error('Error parsing stored hidden teams:', error);
+                    }
+                }
+                
+                if (storedShowHidden) {
+                    setShowHidden(storedShowHidden === 'true');
+                }
+                
+                if (storedJudgeView) {
+                    setJudgeView(storedJudgeView === 'true');
                 }
             }
-            
-            if (storedShowHidden) {
-                setShowHidden(storedShowHidden === 'true');
+        };
+
+        // Load initial values
+        loadFromStorage();
+
+        // Listen for storage events (for URL sharing updates)
+        const handleStorageChange = (e) => {
+            if (e.key === 'hiddenRoomTeams' || e.type === 'storage') {
+                loadFromStorage();
             }
+        };
+
+        if (isClient && typeof window !== 'undefined') {
+            window.addEventListener('storage', handleStorageChange);
             
-            if (storedJudgeView) {
-                setJudgeView(storedJudgeView === 'true');
-            }
+            // Also listen for custom events (for same-window updates)
+            window.addEventListener('storage', handleStorageChange);
         }
+
+        return () => {
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('storage', handleStorageChange);
+            }
+        };
     }, [isClient]);
 
     // Save hidden teams to localStorage whenever hiddenTeams changes

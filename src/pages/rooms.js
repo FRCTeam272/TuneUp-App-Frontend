@@ -14,6 +14,7 @@ const RoomsPage = ({ location }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [showShareUrl, setShowShareUrl] = useState(false);
 
     // Parse URL parameters for hidden teams
     const getHiddenTeamsFromUrl = () => {
@@ -83,9 +84,19 @@ const RoomsPage = ({ location }) => {
                     }
                 }
                 
+                // Check if we're adding new teams
+                const newTeams = Array.from(urlHiddenTeams).filter(id => !existingHidden.has(id));
+                
                 // Merge URL hidden teams with existing ones
                 const mergedHidden = new Set([...existingHidden, ...urlHiddenTeams]);
                 localStorage.setItem('hiddenRoomTeams', JSON.stringify(Array.from(mergedHidden)));
+                
+                // Show notification if new teams were hidden
+                if (newTeams.length > 0) {
+                    toast.success(`Hidden ${newTeams.length} team(s) from shared URL: ${newTeams.join(', ')}`, {
+                        duration: 5000
+                    });
+                }
                 
                 // Force a re-render by triggering a storage event
                 window.dispatchEvent(new Event('storage'));
@@ -104,19 +115,24 @@ const RoomsPage = ({ location }) => {
     const generateShareUrl = () => {
         if (typeof window === 'undefined') return null;
         
+        const baseUrl = window.location.origin + window.location.pathname;
         const hiddenTeams = localStorage.getItem('hiddenRoomTeams');
-        if (!hiddenTeams) return null;
+        
+        if (!hiddenTeams) {
+            return baseUrl; // Return base URL if no hidden teams
+        }
         
         try {
             const hiddenArray = JSON.parse(hiddenTeams);
-            if (hiddenArray.length === 0) return null;
+            if (hiddenArray.length === 0) {
+                return baseUrl; // Return base URL if no hidden teams
+            }
             
-            const baseUrl = window.location.origin + window.location.pathname;
             const hideParam = hiddenArray.join(',');
             return `${baseUrl}?hide=${encodeURIComponent(hideParam)}`;
         } catch (error) {
             console.error('Error generating share URL:', error);
-            return null;
+            return baseUrl; // Fallback to base URL
         }
     };
 
@@ -124,17 +140,32 @@ const RoomsPage = ({ location }) => {
         const shareUrl = generateShareUrl();
         if (shareUrl && typeof navigator !== 'undefined' && navigator.clipboard) {
             navigator.clipboard.writeText(shareUrl).then(() => {
-                toast.success('Share URL copied to clipboard!');
+                const hiddenTeams = localStorage.getItem('hiddenRoomTeams');
+                let hiddenCount = 0;
+                try {
+                    if (hiddenTeams) {
+                        hiddenCount = JSON.parse(hiddenTeams).length;
+                    }
+                } catch (error) {
+                    console.error('Error parsing hidden teams:', error);
+                }
+                
+                if (hiddenCount > 0) {
+                    toast.success(`Share URL copied! Includes ${hiddenCount} hidden team(s).`);
+                } else {
+                    toast.success('Room assignments URL copied to clipboard!');
+                }
+                setShowShareUrl(true);
+                // Hide URL after 10 seconds
+                setTimeout(() => setShowShareUrl(false), 10000);
             }).catch(err => {
                 console.error('Failed to copy URL:', err);
                 toast.error('Failed to copy URL');
             });
         } else {
-            toast.error('No hidden teams to share or clipboard not available');
+            toast.error('Clipboard not available');
         }
     };
-
-    const shareUrl = generateShareUrl();
 
     return (
         <Container fluid className="py-3">
@@ -165,16 +196,14 @@ const RoomsPage = ({ location }) => {
                             >
                                 🏠 Main Menu
                             </Button>
-                            {shareUrl && (
-                                <Button 
-                                    variant="outline-info"
-                                    onClick={handleCopyShareUrl}
-                                    className="projector-button"
-                                    title="Copy shareable URL with current hidden teams"
-                                >
-                                    🔗 Share View
-                                </Button>
-                            )}
+                            <Button 
+                                variant="outline-info"
+                                onClick={handleCopyShareUrl}
+                                className="projector-button"
+                                title="Copy shareable URL for room assignments"
+                            >
+                                🔗 Share View
+                            </Button>
                             <Button 
                                 variant="primary"
                                 onClick={handleRefresh}
@@ -194,6 +223,30 @@ const RoomsPage = ({ location }) => {
                     </div>
                 </Col>
             </Row>
+
+            {/* Share URL Display */}
+            {showShareUrl && (
+                <Row className="mb-4">
+                    <Col xs={12}>
+                        <Alert variant="info" dismissible onClose={() => setShowShareUrl(false)}>
+                            <Alert.Heading className="h6 mb-2">📋 Shareable URL (copied to clipboard)</Alert.Heading>
+                            <div className="small text-break" style={{fontFamily: 'monospace', backgroundColor: '#f8f9fa', padding: '8px', borderRadius: '4px'}}>
+                                {generateShareUrl()}
+                            </div>
+                            <hr className="my-2" />
+                            <small className="text-muted">
+                                {generateShareUrl()?.includes('hide=') ? (
+                                    <>Share this URL to show the room assignments with your current hidden teams. 
+                                    The URL will automatically hide the same teams for anyone who visits it.</>
+                                ) : (
+                                    <>Share this URL to give anyone access to the room assignments page. 
+                                    Hide some teams first to create a customized view.</>
+                                )}
+                            </small>
+                        </Alert>
+                    </Col>
+                </Row>
+            )}
 
             {/* Error Alert */}
             {error && (
