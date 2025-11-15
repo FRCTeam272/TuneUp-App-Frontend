@@ -62,26 +62,6 @@ const EventSchedule = ({ scheduleData }) => {
     });
 
 
-
-    const formatDate = (dateString) => {
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                return 'Invalid Date';
-            }
-            
-            return date.toLocaleDateString('en-US', {
-                timeZone: 'America/New_York',
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        } catch (error) {
-            return 'Invalid Date';
-        }
-    };
-
     const formatTime = (dateString) => {
         try {
             const date = new Date(dateString);
@@ -170,9 +150,10 @@ const EventSchedule = ({ scheduleData }) => {
                         <Table responsive striped hover className="mb-0">
                             <thead className="table-dark">
                                 <tr>
-                                    <th>Time</th>
-                                    <th>Teams</th>
-                                    <th>Actions</th>
+                                    <th className="d-none d-md-table-cell">Event & Time</th>
+                                    <th className="d-md-none">Event Details</th>
+                                    <th className="d-none d-md-table-cell">Teams</th>
+                                    <th style={{width: '100px'}}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -182,7 +163,8 @@ const EventSchedule = ({ scheduleData }) => {
                                     
                                     return (
                                         <tr key={eventId} className={isHidden && showHidden ? 'table-secondary opacity-50' : ''}>
-                                            <td>
+                                            {/* Desktop: Event & Time column */}
+                                            <td className="d-none d-md-table-cell">
                                                 <div>
                                                     <div className="fw-bold">
                                                         {event.name}
@@ -192,7 +174,9 @@ const EventSchedule = ({ scheduleData }) => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            
+                                            {/* Desktop: Teams column */}
+                                            <td className="d-none d-md-table-cell">
                                                 {event.info && event.info.length > 0 ? (
                                                     <Table size="sm" className="mb-0">
                                                         <tbody>
@@ -213,7 +197,42 @@ const EventSchedule = ({ scheduleData }) => {
                                                     <span className="text-muted">No teams assigned</span>
                                                 )}
                                             </td>
-                                            <td>
+                                            
+                                            {/* Mobile: Combined column */}
+                                            <td className="d-md-none">
+                                                <div className="mb-3">
+                                                    <div className="fw-bold mb-1">
+                                                        {event.name}
+                                                    </div>
+                                                    <div className="text-muted small mb-2">
+                                                        {formatTime(event.date)}
+                                                    </div>
+                                                </div>
+                                                {event.info && event.info.length > 0 ? (
+                                                    <div>
+                                                        {event.info.map((team, teamIndex) => (
+                                                            <div key={teamIndex} className="mb-2 p-2 border rounded bg-light">
+                                                                <div className="d-flex flex-column">
+                                                                    <div className="fw-bold text-primary small mb-1">
+                                                                        {team.team_name}
+                                                                    </div>
+                                                                    <div className="text-muted mb-1" style={{fontSize: '0.75rem'}}>
+                                                                        Team #{team.team_id}
+                                                                    </div>
+                                                                    <div className="small">
+                                                                        {team.text}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-muted small">No teams assigned</span>
+                                                )}
+                                            </td>
+                                            
+                                            {/* Actions column */}
+                                            <td className="text-center">
                                                 <Button
                                                     variant={isHidden ? "outline-success" : "outline-secondary"}
                                                     size="sm"
