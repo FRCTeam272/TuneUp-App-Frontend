@@ -298,6 +298,7 @@ const RoomsPage = ({ location }) => {
                             <small className="text-muted" style={{lineHeight: '1.5'}}>
                                 💡 <strong>Tips:</strong> Use the "Hide" button to hide teams you don't want to see. 
                                 Switch between Room View and Judge View using the toggle button. 
+                                In Judge View, filter by specific judge groups to focus on your assignments.
                                 Hidden teams are remembered and can be shared via URL.
                             </small>
                         </div>

@@ -5,6 +5,7 @@ const RoomAssignments = ({ roomData }) => {
     const [hiddenTeams, setHiddenTeams] = useState(new Set());
     const [showHidden, setShowHidden] = useState(false);
     const [judgeView, setJudgeView] = useState(false);
+    const [selectedJudgeGroup, setSelectedJudgeGroup] = useState('all');
     const [isClient, setIsClient] = useState(false);
 
     // Set client-side flag
@@ -19,6 +20,7 @@ const RoomAssignments = ({ roomData }) => {
                 const storedHiddenTeams = localStorage.getItem('hiddenRoomTeams');
                 const storedShowHidden = localStorage.getItem('showHiddenRoomTeams');
                 const storedJudgeView = localStorage.getItem('judgeViewMode');
+                const storedJudgeGroup = localStorage.getItem('selectedJudgeGroup');
                 
                 if (storedHiddenTeams) {
                     try {
@@ -35,6 +37,10 @@ const RoomAssignments = ({ roomData }) => {
                 
                 if (storedJudgeView) {
                     setJudgeView(storedJudgeView === 'true');
+                }
+                
+                if (storedJudgeGroup) {
+                    setSelectedJudgeGroup(storedJudgeGroup);
                 }
             }
         };
@@ -84,6 +90,13 @@ const RoomAssignments = ({ roomData }) => {
             localStorage.setItem('judgeViewMode', judgeView.toString());
         }
     }, [judgeView, isClient]);
+
+    // Save selectedJudgeGroup preference to localStorage
+    useEffect(() => {
+        if (isClient && typeof window !== 'undefined') {
+            localStorage.setItem('selectedJudgeGroup', selectedJudgeGroup);
+        }
+    }, [selectedJudgeGroup, isClient]);
 
     if (!roomData || !Array.isArray(roomData) || roomData.length === 0) {
         return (
@@ -139,9 +152,20 @@ const RoomAssignments = ({ roomData }) => {
         setHiddenTeams(newHiddenTeams);
     };
 
-    const visibleData = showHidden 
+    // Get unique judge groups from the data
+    const availableJudgeGroups = [...new Set(roomData
+        .map(assignment => assignment.judge_group)
+        .filter(group => group && group.trim() !== '')
+    )].sort();
+
+    // Filter by judge group first, then by hidden teams
+    const judgeGroupFilteredData = selectedJudgeGroup === 'all' 
         ? sortedData 
-        : sortedData.filter((assignment) => !hiddenTeams.has(assignment.team_id));
+        : sortedData.filter((assignment) => assignment.judge_group === selectedJudgeGroup);
+
+    const visibleData = showHidden 
+        ? judgeGroupFilteredData 
+        : judgeGroupFilteredData.filter((assignment) => !hiddenTeams.has(assignment.team_id));
 
     const hiddenCount = hiddenTeams.size;
 
@@ -153,16 +177,38 @@ const RoomAssignments = ({ roomData }) => {
                         {judgeView ? '⚖️ Judge Assignments' : '🏠 Room Assignments'}
                     </h4>
                     <div className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-3">
-                        <div className="d-flex align-items-center gap-2 w-100 w-lg-auto">
+                        <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 w-100 w-lg-auto">
                             <Button
                                 variant={judgeView ? "primary" : "outline-primary"}
                                 size="sm"
                                 onClick={() => setJudgeView(!judgeView)}
-                                className="text-nowrap flex-fill flex-lg-grow-0"
+                                className="text-nowrap flex-fill flex-sm-grow-0"
                                 style={{minHeight: '44px'}}
                             >
                                 {judgeView ? '⚖️ Judge View' : '🏠 Room View'}
                             </Button>
+                            
+                            {judgeView && availableJudgeGroups.length > 0 && (
+                                <div className="d-flex align-items-center gap-2 flex-fill flex-sm-grow-0">
+                                    <label htmlFor="judge-group-filter" className="text-nowrap small text-muted mb-0">
+                                        Filter:
+                                    </label>
+                                    <select
+                                        id="judge-group-filter"
+                                        className="form-select form-select-sm"
+                                        value={selectedJudgeGroup}
+                                        onChange={(e) => setSelectedJudgeGroup(e.target.value)}
+                                        style={{minHeight: '36px', minWidth: '120px'}}
+                                    >
+                                        <option value="all">All Groups</option>
+                                        {availableJudgeGroups.map(group => (
+                                            <option key={group} value={group}>
+                                                Group {group}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
                         
                         <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 w-100 w-lg-auto">
@@ -352,6 +398,7 @@ const RoomAssignments = ({ roomData }) => {
                 {sortedData.length > 0 && (
                     <Card.Footer className="text-muted small">
                         Showing {visibleData.length} of {sortedData.length} assignments
+                        {selectedJudgeGroup !== 'all' && judgeView && ` (filtered to Judge Group ${selectedJudgeGroup})`}
                         {hiddenCount > 0 && ` (${hiddenCount} hidden)`}
                         {judgeView && (
                             <span className="ms-3">
