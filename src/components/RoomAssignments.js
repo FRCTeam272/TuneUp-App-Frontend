@@ -5,10 +5,16 @@ const RoomAssignments = ({ roomData }) => {
     const [hiddenTeams, setHiddenTeams] = useState(new Set());
     const [showHidden, setShowHidden] = useState(false);
     const [judgeView, setJudgeView] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+
+    // Set client-side flag
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     // Load preferences from localStorage on component mount
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (isClient && typeof window !== 'undefined') {
             const storedHiddenTeams = localStorage.getItem('hiddenRoomTeams');
             const storedShowHidden = localStorage.getItem('showHiddenRoomTeams');
             const storedJudgeView = localStorage.getItem('judgeViewMode');
@@ -30,29 +36,29 @@ const RoomAssignments = ({ roomData }) => {
                 setJudgeView(storedJudgeView === 'true');
             }
         }
-    }, []);
+    }, [isClient]);
 
     // Save hidden teams to localStorage whenever hiddenTeams changes
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (isClient && typeof window !== 'undefined') {
             const hiddenArray = Array.from(hiddenTeams);
             localStorage.setItem('hiddenRoomTeams', JSON.stringify(hiddenArray));
         }
-    }, [hiddenTeams]);
+    }, [hiddenTeams, isClient]);
 
     // Save showHidden preference to localStorage
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (isClient && typeof window !== 'undefined') {
             localStorage.setItem('showHiddenRoomTeams', showHidden.toString());
         }
-    }, [showHidden]);
+    }, [showHidden, isClient]);
 
     // Save judgeView preference to localStorage
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (isClient && typeof window !== 'undefined') {
             localStorage.setItem('judgeViewMode', judgeView.toString());
         }
-    }, [judgeView]);
+    }, [judgeView, isClient]);
 
     if (!roomData || !Array.isArray(roomData) || roomData.length === 0) {
         return (

@@ -69,7 +69,7 @@ const RoomsPage = ({ location }) => {
         
         // Apply URL-based hidden teams after a short delay to ensure localStorage is loaded first
         const urlHiddenTeams = getHiddenTeamsFromUrl();
-        if (urlHiddenTeams.size > 0) {
+        if (urlHiddenTeams.size > 0 && typeof window !== 'undefined') {
             setTimeout(() => {
                 // Get existing hidden teams from localStorage
                 const storedHiddenTeams = localStorage.getItem('hiddenRoomTeams');
@@ -102,6 +102,8 @@ const RoomsPage = ({ location }) => {
     };
 
     const generateShareUrl = () => {
+        if (typeof window === 'undefined') return null;
+        
         const hiddenTeams = localStorage.getItem('hiddenRoomTeams');
         if (!hiddenTeams) return null;
         
@@ -109,7 +111,7 @@ const RoomsPage = ({ location }) => {
             const hiddenArray = JSON.parse(hiddenTeams);
             if (hiddenArray.length === 0) return null;
             
-            const baseUrl = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '';
+            const baseUrl = window.location.origin + window.location.pathname;
             const hideParam = hiddenArray.join(',');
             return `${baseUrl}?hide=${encodeURIComponent(hideParam)}`;
         } catch (error) {
