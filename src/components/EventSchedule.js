@@ -194,19 +194,21 @@ const EventSchedule = ({ scheduleData }) => {
                                             </td>
                                             <td>
                                                 {event.info && event.info.length > 0 ? (
-                                                    <div>
-                                                        {event.info.map((team, teamIndex) => (
-                                                            <div key={teamIndex} className="mb-2 d-flex align-items-start">
-                                                                <div className="me-3">
-                                                                    <div className="fw-bold text-primary">{team.team_name}</div>
-                                                                    <div className="small text-muted">Team #{team.team_id}</div>
-                                                                </div>
-                                                                <div className="flex-grow-1">
-                                                                    <span>{team.text}</span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                    <Table size="sm" className="mb-0">
+                                                        <tbody>
+                                                            {event.info.map((team, teamIndex) => (
+                                                                <tr key={teamIndex}>
+                                                                    <td className="border-1 py-1" style={{minWidth: '200px'}}>
+                                                                        <div className="fw-bold text-primary small">{team.team_name}</div>
+                                                                        <div className="text-muted" style={{fontSize: '0.75rem'}}>#{team.team_id}</div>
+                                                                    </td>
+                                                                    <td className="border-1 py-1">
+                                                                        <span className="small">{team.text}</span>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </Table>
                                                 ) : (
                                                     <span className="text-muted">No teams assigned</span>
                                                 )}
