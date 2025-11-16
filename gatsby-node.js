@@ -3,11 +3,12 @@
  *
  * See: https://www.gatsbyjs.com/docs/reference/config-files/gatsby-node/
  */
+const path = require('path');
 
 /**
  * @type {import('gatsby').GatsbyNode['createPages']}
  */
 exports.createPages = async ({ actions }) => {
-  const { createPage } = actions;
-  // You can create pages programmatically here if needed
+  // No special routing needed for query string approach
+  // The /team page will handle query parameters naturally
 };

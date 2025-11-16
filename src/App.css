@@ -405,3 +405,138 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+/* Multi-Team Comparison Styles */
+.multi-team-comparison .stat-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.multi-team-comparison .stat-box:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
+}
+
+.multi-team-comparison .stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.multi-team-comparison .rank-badge {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.multi-team-comparison .team-name {
+  font-weight: 500;
+  color: #495057;
+}
+
+.multi-team-comparison .team-name:hover {
+  color: #007bff;
+  cursor: pointer;
+}
+
+/* Top Score Boxes */
+.top-score-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.position-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ffc107;
+  color: #000;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.score-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 10px 0 5px 0;
+}
+
+.score-percentage {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.average-calculation {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.average-calculation h5 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+/* Team Selection Badges */
+.multi-team-comparison .badge {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
+.multi-team-comparison .badge .btn-link {
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0;
+  margin-left: 8px;
+}
+
+/* Combined Schedule Styling */
+.multi-team-comparison .schedule-table .team-cell {
+  min-width: 120px;
+}
+
+.multi-team-comparison .schedule-table .time-cell {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.multi-team-comparison .schedule-table .event-badge {
+  margin-right: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .multi-team-comparison .stat-value {
+    font-size: 2rem;
+  }
+  
+  .top-score-box {
+    margin-bottom: 15px;
+  }
+  
+  .score-value {
+    font-size: 1.5rem;
+  }
+  
+  .multi-team-comparison .schedule-table {
+    font-size: 0.9rem;
+  }
+}

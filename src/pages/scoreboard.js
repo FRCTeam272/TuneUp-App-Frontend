@@ -101,6 +101,13 @@ const ScoreboardPage = () => {
                             </Button>
                             <Button 
                                 className="projector-button" 
+                                variant="outline-warning"
+                                onClick={() => navigate('/multi-team')}
+                            >
+                                📊 Compare Teams
+                            </Button>
+                            <Button 
+                                className="projector-button" 
                                 variant="outline-info"
                                 onClick={() => navigate('/schedule')}
                             >
@@ -137,6 +144,13 @@ const ScoreboardPage = () => {
                                     onClick={() => navigate('/')}
                                 >
                                     🏠 Main Menu
+                                </Button>
+                                <Button 
+                                    className="projector-button" 
+                                    variant="outline-warning"
+                                    onClick={() => navigate('/multi-team')}
+                                >
+                                    📊 Compare Teams
                                 </Button>
                                 <Button 
                                     className="projector-button" 

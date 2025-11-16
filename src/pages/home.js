@@ -58,6 +58,12 @@ const IndexPage = () => {
             variant: 'primary'
         },
         {
+            title: '📊 Multi-Team Compare',
+            description: 'Select and compare multiple teams side-by-side',
+            path: '/multi-team',
+            variant: 'warning'
+        },
+        {
             title: '📅 Event Schedule',
             description: 'View upcoming events and team schedules',
             path: '/schedule',
@@ -86,7 +92,7 @@ const IndexPage = () => {
         const trimmedNumber = teamNumber.trim();
         
         if (trimmedNumber && /^\d+$/.test(trimmedNumber)) {
-            navigate(`/team/${trimmedNumber}`);
+            navigate(`/team?id=${trimmedNumber}`);
         } else {
             // Could add error handling here if needed
             alert('Please enter a valid team number');

@@ -241,7 +241,7 @@ const AdminPage = ({ serverData }) => {
                                             <Button 
                                                 variant="link" 
                                                 className="team-number-link"
-                                                onClick={() => navigate(`/team/${team.team_id}`)}
+                                                onClick={() => navigate(`/team?id=${team.team_id}`)}
                                             >
                                                 #{team.team_id}
                                             </Button>
