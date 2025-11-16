@@ -244,7 +244,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
                                             </td>
                                             <td>
                                                 <strong 
-                                                    onClick={() => !isCurrent && navigate(`/team/${team.team_id}`)}
+                                                    onClick={() => !isCurrent && (console.log(`/team?id=${team.team_id}`), navigate(`/team?id=${team.team_id}`))}
                                                     style={!isCurrent ? { cursor: 'pointer' } : {}}
                                                 >
                                                     {team.team_id}
