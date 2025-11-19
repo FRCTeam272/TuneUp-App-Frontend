@@ -1,14 +1,15 @@
 import * as React from "react"
 import { navigate } from 'gatsby';
+import IndexPage from "./home";
 
-const IndexPage = () => {
+const RealIndexPage = () => {
   React.useEffect(() => {
     navigate('/home');
   }, []);
 
-  return <>Redirecting...</>; // This page will redirect immediately
+  return <IndexPage></IndexPage>; // This page will redirect immediately
 };
 
-export default IndexPage;
+export default RealIndexPage;
 
-export const Head = () => <title>Redirecting...</title>
+export const Head = () => <title>Index</title>
