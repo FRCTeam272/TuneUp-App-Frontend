@@ -322,7 +322,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
                                             <Button
                                                 variant="link"
                                                 className="p-0 fw-bold text-decoration-none"
-                                                onClick={() => navigate(`/team/${team.teamId}`)}
+                                                onClick={() => navigate(`/team?id=${team.teamId}`)}
                                                 aria-label={`View details for team ${team.teamId}`}
                                             >
                                                 {team.teamId}
@@ -359,7 +359,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
                                             <Button
                                                 size="sm"
                                                 variant="outline-primary"
-                                                onClick={() => navigate(`/team/${team.teamId}`)}
+                                                onClick={() => navigate(`/team?id=${team.teamId}`)}
                                             >
                                                 View
                                             </Button>

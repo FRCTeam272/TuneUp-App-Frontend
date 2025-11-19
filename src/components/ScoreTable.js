@@ -84,7 +84,7 @@ export default function ScoreTable({teamData, refreshData}){
     }, [mutapleTeamData, mapIndex])
 
     const handleTeamClick = (teamNumber) => {
-        navigate(`/team/${teamNumber}`);
+        navigate(`/team?id=${teamNumber}`);
     };
 
     const displayData = mutapleTeamData.slice(mapIndex, mapIndex + size);
