@@ -80,6 +80,12 @@ const IndexPage = () => {
             description: isPasswordValid ? 'Manage teams, add/remove scores, and administrative functions' : 'View a list of all teams and their scores',
             path: '/admin',
             variant: 'secondary'
+        },
+        {
+            title: '💯 Scoring Sheet',
+            description: 'access our scoring sheet',
+            path: 'https://272-fll-scoresheet.netlify.app/',
+            variant: 'danger'
         }
     ];
 
