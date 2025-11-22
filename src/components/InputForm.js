@@ -1,6 +1,7 @@
 import React from "react"
 import useInput from "../hooks/useInput"
-import { Form, Button, Toast } from "react-bootstrap"
+import { Form, Button, Toast, Image } from "react-bootstrap"
+import "../../static/home.png"
 import { useContext, useEffect, useState } from "react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmarkCircle } from "@fortawesome/free-regular-svg-icons"
@@ -108,5 +109,9 @@ export default function InputForm({teamData}){
         {form}
         <br /> <br />
         <Button onClick={Update} className="projector-button" style={{float:"right"}}>Submit</Button>
+        <br/><br/>
+        <span>Scan to access App</span>
+        <br/>
+        <img src="/home.png" alt="Home" style={{display: 'block', marginTop: '20px'}} />
     </Form>
 }

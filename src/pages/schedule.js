@@ -44,6 +44,10 @@ const SchedulePage = () => {
         navigate('/');
     };
 
+    const handleViewSpreadsheet = () => {
+        navigate("https://docs.google.com/spreadsheets/d/1cVw0m2ApI1b0wr6tsfiTpBFfGQYBZgEh/edit?usp=sharing&ouid=112601030136214038341&rtpof=true&sd=true")
+    }
+
     return (
         <Container fluid className="py-3">
             {/* Header */}
@@ -87,6 +91,13 @@ const SchedulePage = () => {
                                 ) : (
                                     <>🔄 Refresh</>
                                 )}
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleViewSpreadsheet}
+                                className="projector-button"
+                            >
+                                📄 View Full Schedule As A Spreadsheet
                             </Button>
                         </div>
                     </div>
