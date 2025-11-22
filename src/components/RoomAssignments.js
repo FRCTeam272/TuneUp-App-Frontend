@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,  } from 'react';
 import { Card, Table, Badge, Button, Form, Container } from 'react-bootstrap';
+import { navigate } from 'gatsby';
+
 
 const RoomAssignments = ({ roomData }) => {
     const [hiddenTeams, setHiddenTeams] = useState(new Set());
@@ -345,7 +347,7 @@ const RoomAssignments = ({ roomData }) => {
                                                             <div className="fw-bold text-primary">
                                                                 {assignment.team_name || `Team ${assignment.team_id}`}
                                                             </div>
-                                                            <div className="text-muted small">
+                                                            <div className="text-muted small" onClick={() => navigate(`/team?id=${assignment.team_id}`)} style={{cursor: 'pointer'}}>
                                                                 #{assignment.team_id}
                                                             </div>
                                                         </div>
