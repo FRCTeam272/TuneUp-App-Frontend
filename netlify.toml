@@ -10,10 +10,16 @@
   GATSBY_DIVISOR = "3"
   GATSBY_CORS_ENABLED = "true"
 
+# Redirect root to home
+[[redirects]]
+  from = "/"
+  to = "/home"
+  status = 301
+
 # Handle client-side routing
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/home"
   status = 200
 
 # Handle API calls - proxy to backend during runtime
