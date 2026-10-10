@@ -48,13 +48,13 @@ const RoomsPage = ({ location }) => {
         return new Set();
     };
 
-    const fetchRooms = async () => {
+    const fetchRooms = async (force = false) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await scheduleApiClient.getRooms();
+            const data = await scheduleApiClient.getRooms({ force });
             setRoomData(data || []);
-            setLastUpdated(new Date());
+            setLastUpdated(scheduleApiClient.roomsFetchedAt() || new Date());
             toast.success('Room assignments updated successfully!');
         } catch (err) {
             console.error('Error fetching room assignments:', err);
@@ -105,7 +105,7 @@ const RoomsPage = ({ location }) => {
     }, [location?.search]);
 
     const handleRefresh = () => {
-        fetchRooms();
+        fetchRooms(true);
     };
 
     const handleBackToMenu = () => {

@@ -24,7 +24,8 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "nswag": "^14.7.1"
   },
   "scripts": {
     "develop": "cross-env NODE_ENV=development gatsby develop",
@@ -35,6 +36,25 @@
     "build:ssr": "cross-env NODE_ENV=production gatsby build && gatsby serve",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "test": "jest"
+    "test": "jest",
+    "api:spec": "node scripts/update-api-spec.js",
+    "api:generate": "nswag run nswag.json /runtime:Net80",
+    "api:update": "npm run api:spec && npm run api:generate"
+  },
+  "allowScripts": {
+    "@fortawesome/fontawesome-common-types@6.2.0": true,
+    "@fortawesome/fontawesome-svg-core@6.2.0": true,
+    "@fortawesome/free-regular-svg-icons@6.2.0": true,
+    "lmdb@2.5.2": true,
+    "lmdb@2.5.3": true,
+    "@parcel/watcher@2.5.1": true,
+    "core-js@3.46.0": true,
+    "core-js-pure@3.26.0": true,
+    "es5-ext@0.10.64": true,
+    "gatsby@5.15.0": true,
+    "gatsby-cli@5.15.0": true,
+    "msgpackr-extract@3.0.3": true,
+    "sharp@0.32.6": true,
+    "styled-components@5.3.6": true
   }
 }

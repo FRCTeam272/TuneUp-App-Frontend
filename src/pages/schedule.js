@@ -15,13 +15,13 @@ const SchedulePage = () => {
     const [error, setError] = useState(null);
     const [lastUpdated, setLastUpdated] = useState(null);
 
-    const fetchSchedule = async () => {
+    const fetchSchedule = async (force = false) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await scheduleApiClient.getSchedule();
+            const data = await scheduleApiClient.getSchedule({ force });
             setScheduleData(data || []);
-            setLastUpdated(new Date());
+            setLastUpdated(scheduleApiClient.scheduleFetchedAt() || new Date());
             toast.success('Schedule updated successfully!');
         } catch (err) {
             console.error('Error fetching schedule:', err);
@@ -37,7 +37,7 @@ const SchedulePage = () => {
     }, []);
 
     const handleRefresh = () => {
-        fetchSchedule();
+        fetchSchedule(true);
     };
 
     const handleBackToMenu = () => {
