@@ -1,9 +1,10 @@
 import * as React from "react"
+import type { HeadFC } from "gatsby"
 
 const HealthCheckPage = () => {
   const [healthStatus, setHealthStatus] = React.useState('checking');
   const [backendStatus, setBackendStatus] = React.useState('checking');
-  const [envVars, setEnvVars] = React.useState({});
+  const [envVars, setEnvVars] = React.useState<Record<string, string | undefined>>({});
 
   React.useEffect(() => {
     // Check environment variables
@@ -98,4 +99,4 @@ const HealthCheckPage = () => {
 
 export default HealthCheckPage
 
-export const Head = () => <title>Health Check - FLL Scoreboard</title>
+export const Head: HeadFC = () => <title>Health Check - FLL Scoreboard</title>

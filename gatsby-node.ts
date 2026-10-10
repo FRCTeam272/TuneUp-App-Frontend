@@ -3,12 +3,9 @@
  *
  * See: https://www.gatsbyjs.com/docs/reference/config-files/gatsby-node/
  */
-const path = require('path');
+import type { GatsbyNode } from "gatsby"
 
-/**
- * @type {import('gatsby').GatsbyNode['createPages']}
- */
-exports.createPages = async ({ actions }) => {
+export const createPages: GatsbyNode["createPages"] = async () => {
   // No special routing needed for query string approach
   // The /team page will handle query parameters naturally
 };

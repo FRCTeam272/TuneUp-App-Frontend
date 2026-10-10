@@ -1,9 +1,47 @@
 import { navigate } from 'gatsby';
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Row, Col, ProgressBar } from 'react-bootstrap';
+import type { DisplayTeamScoresResponse } from '../api';
 
-const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
-    const [processedData, setProcessedData] = useState({});
+type Trend = 'improving' | 'declining' | 'stable' | 'insufficient-data';
+
+interface RankedTeam extends DisplayTeamScoresResponse {
+    rank: number;
+    isCurrent: boolean;
+    isAbove: boolean;
+    isBelow: boolean;
+}
+
+interface RankingInfo extends DisplayTeamScoresResponse {
+    rank: number;
+    totalTeams: number;
+    /** Up to two teams either side, including this one. */
+    nearbyTeams: RankedTeam[];
+}
+
+interface ProcessedTeam {
+    teamNumber: number;
+    teamName: string;
+    allScores: number[];
+    sortedScores: number[];
+    topScores: number[];
+    average: number;
+    highestScore: number;
+    lowestScore: number;
+    totalRounds: number;
+    improvementTrend: Trend;
+    currentTeamRankingInfo: RankingInfo | null;
+}
+
+interface TeamDetailProps {
+    teamData: DisplayTeamScoresResponse;
+    divisor?: number;
+    /** All teams, for the nearby-rankings table. */
+    rankingData?: DisplayTeamScoresResponse[] | null;
+}
+
+const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }: TeamDetailProps) => {
+    const [processedData, setProcessedData] = useState<ProcessedTeam | null>(null);
 
     useEffect(() => {
         if (teamData) {
@@ -19,7 +57,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
             // Find current team in ranking data
             const currentTeamInRankings = findCurrentTeamInRankings(teamData.team_id, rankingData);
             
-            const processed = {
+            const processed: ProcessedTeam = {
                 teamNumber: teamData.team_id,
                 teamName: teamData.team_name,
                 allScores: scores,
@@ -38,7 +76,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         }
     }, [teamData, divisor, rankingData]);
 
-    const calculateTrend = (scores) => {
+    const calculateTrend = (scores: number[]): Trend => {
         if (scores.length < 2) return 'insufficient-data';
         
         const recentScores = scores.slice(-3); // Last 3 scores
@@ -56,7 +94,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         return 'stable';
     };
 
-    const findCurrentTeamInRankings = (teamId, rankings) => {
+    const findCurrentTeamInRankings = (teamId: number, rankings: DisplayTeamScoresResponse[] | null | undefined): RankingInfo | null => {
         if (!rankings || !Array.isArray(rankings) || rankings.length === 0) {
             return null;
         }
@@ -76,7 +114,6 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         const currentTeam = sortedRankings[teamIndex];
         
         // Get nearby teams (2 above and 2 below)
-        const nearbyTeams = [];
         
         // Calculate range for nearby teams
         let startIndex = Math.max(0, teamIndex - 2);
@@ -97,7 +134,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         }
         
         // Collect nearby teams with their ranking info, INCLUDING the current team
-        const allTeamsInRange = [];
+        const allTeamsInRange: RankedTeam[] = [];
         for (let i = startIndex; i <= endIndex; i++) {
             const team = {
                 ...sortedRankings[i],
@@ -117,7 +154,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         };
     };
 
-    const getTrendBadge = (trend) => {
+    const getTrendBadge = (trend: Trend) => {
         switch (trend) {
             case 'improving':
                 return <Badge bg="success">📈 Improving</Badge>;
@@ -130,7 +167,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         }
     };
 
-    const getScoreColor = (score, maxScore) => {
+    const getScoreColor = (score: number, maxScore: number) => {
         const percentage = (score / maxScore) * 100;
         if (percentage >= 90) return '#27ae60';
         if (percentage >= 75) return '#f39c12';
@@ -138,11 +175,12 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
         return '#e74c3c';
     };
 
-    if (!processedData.teamNumber) {
+    if (!processedData) {
         return <div>Loading team details...</div>;
     }
 
     const maxScore = processedData.highestScore || 100;
+    const rankingInfo = processedData.currentTeamRankingInfo;
 
     return (
         <div className="team-detail-container">
@@ -194,7 +232,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
             </Card>
 
             {/* Nearby Teams in Rankings */}
-            {processedData.currentTeamRankingInfo && processedData.currentTeamRankingInfo.nearbyTeams && processedData.currentTeamRankingInfo.nearbyTeams.length > 0 && (
+            {rankingInfo && rankingInfo.nearbyTeams.length > 0 && (
                 <Card className="mb-4 projector-card">
                     <Card.Header className="projector-card-header">
                         <h3 className="mb-0">📊 Nearby Teams in Rankings</h3>
@@ -211,10 +249,10 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {processedData.currentTeamRankingInfo.nearbyTeams
+                                {rankingInfo.nearbyTeams
                                     .sort((a, b) => a.rank - b.rank) // Sort by rank to maintain order
                                     .map((team, index) => {
-                                    const scoreDiff = (team.average_top_three || 0) - (processedData.currentTeamRankingInfo.average_top_three || 0);
+                                    const scoreDiff = (team.average_top_three || 0) - (rankingInfo.average_top_three || 0);
                                     const isAbove = team.isAbove;
                                     const isBelow = team.isBelow;
                                     const isCurrent = team.isCurrent;
@@ -286,7 +324,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }) => {
                         </Table>
                         <div className="mt-3">
                             <small className="text-muted">
-                                <strong>Score Gap:</strong> Difference between their average score and your current average ({(processedData.currentTeamRankingInfo.average_top_three || 0).toFixed(1)})
+                                <strong>Score Gap:</strong> Difference between their average score and your current average ({(rankingInfo.average_top_three || 0).toFixed(1)})
                                 <br />
                                 <strong>Green (↑):</strong> Teams performing better than you
                                 <strong className="ms-3">Red (↓):</strong> Teams performing below you

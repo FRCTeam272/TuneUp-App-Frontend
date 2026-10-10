@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import { navigate } from 'gatsby';
+import { navigate, type HeadFC } from 'gatsby';
 import '../App.css';
 import '../mobile.css';
 
@@ -139,4 +139,4 @@ const NotFoundPage = () => {
 
 export default NotFoundPage;
 
-export const Head = () => <title>404 - Page Not Found | FLL Scoreboard</title>
+export const Head: HeadFC = () => <title>404 - Page Not Found | FLL Scoreboard</title>

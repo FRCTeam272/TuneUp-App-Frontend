@@ -14,10 +14,22 @@ export const LONG_TERM_TTL = 10 * MINUTE; // roster data: only changes when the 
 
 const STORAGE_PREFIX = `tuneup-cache:v1:${process.env.GATSBY_BACKEND_URL || ''}:`;
 
-const memory = new Map(); // key -> { data, savedAt }
-const inFlight = new Map(); // key -> Promise
+interface Entry {
+    data: unknown;
+    savedAt: number;
+}
 
-function storage() {
+export interface CacheOptions {
+    /** How long a cached copy is served without a request, in ms. 0 = always hit the network. */
+    ttl?: number;
+    /** Skip the cached copy (it's still used as the outage fallback). */
+    force?: boolean;
+}
+
+const memory = new Map<string, Entry>();
+const inFlight = new Map<string, Promise<unknown>>();
+
+function storage(): Storage | null {
     try {
         return typeof window !== 'undefined' ? window.localStorage : null;
     } catch (e) {
@@ -25,12 +37,13 @@ function storage() {
     }
 }
 
-function read(key) {
-    if (memory.has(key)) return memory.get(key);
+function read(key: string): Entry | null {
+    const cached = memory.get(key);
+    if (cached) return cached;
     const store = storage();
     if (!store) return null;
     try {
-        const entry = JSON.parse(store.getItem(STORAGE_PREFIX + key));
+        const entry: Entry | null = JSON.parse(store.getItem(STORAGE_PREFIX + key) ?? 'null');
         if (entry) memory.set(key, entry);
         return entry;
     } catch (e) {
@@ -38,7 +51,7 @@ function read(key) {
     }
 }
 
-function write(key, data) {
+function write(key: string, data: unknown) {
     const entry = { data, savedAt: Date.now() };
     memory.set(key, entry);
     const store = storage();
@@ -51,28 +64,27 @@ function write(key, data) {
 }
 
 /**
- * @param {string} key unique cache key for this request
- * @template T
- * @param {() => Promise<T>} load performs the request; resolves with the response data
- * @param {{ttl?: number, force?: boolean}} options ttl 0 = always hit the network
- * @returns {Promise<T>}
+ * @param key unique cache key for this request
+ * @param load performs the request; resolves with the response data
  */
-export function cachedJson(key, load, { ttl = 0, force = false } = {}) {
-    const cached = read(key);
+export function cachedJson<T>(key: string, load: () => Promise<T>, { ttl = 0, force = false }: CacheOptions = {}): Promise<T> {
+    // Entries under a key are only ever written by the same `load`, so they hold a T.
+    const cached = read(key) as { data: T; savedAt: number } | null;
     if (!force && cached && ttl > 0 && Date.now() - cached.savedAt < ttl) {
         return Promise.resolve(cached.data);
     }
-    if (inFlight.has(key)) return inFlight.get(key);
+    const pending = inFlight.get(key);
+    if (pending) return pending as Promise<T>;
 
     // A request is "current" until it finishes or invalidate() drops it; only current requests
     // may update the cache, so a response that raced a write can't overwrite fresher data.
     const isCurrent = () => inFlight.get(key) === request;
-    const request = load()
+    const request: Promise<T> = load()
         .then((data) => {
             if (isCurrent()) write(key, data);
             return data;
         })
-        .catch((error) => {
+        .catch((error: unknown) => {
             if (cached && isOutage(error)) {
                 console.warn(`Network request for ${key} failed, using cached copy from ${new Date(cached.savedAt).toLocaleTimeString()}`, error);
                 return cached.data;
@@ -89,20 +101,21 @@ export function cachedJson(key, load, { ttl = 0, force = false } = {}) {
 
 // Network failures (TypeError from fetch) and 5xx mean "backend unreachable". Errors carrying a
 // 4xx status, or a parsed error body the generated client threw, are real answers.
-function isOutage(error) {
+function isOutage(error: unknown): boolean {
     if (!(error instanceof Error)) return false;
-    return typeof error.status !== 'number' || error.status >= 500;
+    const status = (error as Error & { status?: unknown }).status;
+    return typeof status !== 'number' || status >= 500;
 }
 
 /** Date the cached copy of `key` was fetched from the server, or null if nothing is cached. */
-export function cachedAt(key) {
+export function cachedAt(key: string): Date | null {
     const entry = read(key);
     return entry ? new Date(entry.savedAt) : null;
 }
 
 /** Drop cached entries whose key starts with any of the given prefixes (all entries if none given). */
-export function invalidate(...prefixes) {
-    const matches = (key) => prefixes.length === 0 || prefixes.some((prefix) => key.startsWith(prefix));
+export function invalidate(...prefixes: string[]) {
+    const matches = (key: string) => prefixes.length === 0 || prefixes.some((prefix) => key.startsWith(prefix));
     for (const key of Array.from(memory.keys())) {
         if (matches(key)) memory.delete(key);
     }
@@ -127,4 +140,4 @@ export function invalidate(...prefixes) {
 export const KEYS = {
     scores: 'scores:', // anything containing scores
     roster: 'roster:', // teams, schedule, rooms, events
-};
+} as const;

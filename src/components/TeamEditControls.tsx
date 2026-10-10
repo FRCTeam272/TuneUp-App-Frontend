@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
 import { Button, Form, InputGroup, Modal, Alert, Row, Col, Badge } from 'react-bootstrap';
+import type { DisplayTeamScoresResponse } from '../api';
+
+/** What the page's edit handlers report back. */
+export type EditResult = { success: true } | { success: false; error?: string };
+
+interface TeamEditControlsProps {
+    teamData: DisplayTeamScoresResponse;
+    onEditTeamName: (name: string) => Promise<EditResult>;
+    onAddScore: (score: number) => Promise<EditResult>;
+    onRemoveScore: (score: number) => Promise<EditResult>;
+    isPasswordValid: boolean;
+}
+
+interface Message {
+    text: string;
+    type: '' | 'success' | 'danger';
+}
 
 const TeamEditControls = ({ 
     teamData, 
@@ -7,13 +24,13 @@ const TeamEditControls = ({
     onAddScore, 
     onRemoveScore,
     isPasswordValid 
-}) => {
+}: TeamEditControlsProps) => {
     const [showEditName, setShowEditName] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
     const [newScore, setNewScore] = useState('');
     const [scoreToRemove, setScoreToRemove] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ text: '', type: '' });
+    const [message, setMessage] = useState<Message>({ text: '', type: '' });
 
     const handleEditTeamName = async () => {
         if (!newTeamName.trim()) {
@@ -50,7 +67,6 @@ const TeamEditControls = ({
 
         const result = await onAddScore(score);
         
-        // result.success = result.team_id === teamData.team_id && result.score === score;
         console.log("Add Score Result:", result);
         if (result.success) {
             setMessage({ text: 'Score added successfully!', type: 'success' });

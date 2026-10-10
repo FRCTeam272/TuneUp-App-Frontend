@@ -24,14 +24,20 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.17.6",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/styled-components": "^5.1.34",
     "cross-env": "^10.1.0",
-    "nswag": "^14.7.1"
+    "nswag": "^14.7.1",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "develop": "cross-env NODE_ENV=development gatsby develop",
     "develop:ssr": "cross-env NODE_ENV=development GATSBY_DEV_SSR=true gatsby develop",
     "start": "cross-env NODE_ENV=development gatsby develop",
-    "build": "gatsby clean && cross-env NODE_ENV=production gatsby build",
+    "build": "gatsby clean && tsc --noEmit && cross-env NODE_ENV=production gatsby build",
     "build:dev": "cross-env NODE_ENV=development gatsby build",
     "build:ssr": "cross-env NODE_ENV=production gatsby build && gatsby serve",
     "serve": "gatsby serve",
@@ -39,7 +45,8 @@
     "test": "jest",
     "api:spec": "node scripts/update-api-spec.js",
     "api:generate": "nswag run nswag.json /runtime:Net80",
-    "api:update": "npm run api:spec && npm run api:generate"
+    "api:update": "npm run api:spec && npm run api:generate",
+    "typecheck": "tsc --noEmit"
   },
   "allowScripts": {
     "@fortawesome/fontawesome-common-types@6.2.0": true,

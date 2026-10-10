@@ -1,23 +1,22 @@
 import * as React from "react"
 import { useState, useEffect } from 'react';
 import { Button, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { navigate } from 'gatsby';
+import { navigate, type HeadFC, type PageProps } from 'gatsby';
 import toast, { Toaster } from 'react-hot-toast';
 import RoomAssignments from '../components/RoomAssignments';
-import { Schedule_API_Client } from "../api";
+import { scheduleApi, type RoomAssignmentResponse } from "../api";
 import '../App.css';
 import '../mobile.css';
 
-const RoomsPage = ({ location }) => {
-    const scheduleApiClient = new Schedule_API_Client();
-    const [roomData, setRoomData] = useState([]);
+const RoomsPage = ({ location }: PageProps) => {
+    const [roomData, setRoomData] = useState<RoomAssignmentResponse[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [lastUpdated, setLastUpdated] = useState(null);
+    const [error, setError] = useState<string | null>(null);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [showShareUrl, setShowShareUrl] = useState(false);
 
     // Parse URL parameters for hidden teams
-    const getHiddenTeamsFromUrl = () => {
+    const getHiddenTeamsFromUrl = (): Set<number> => {
         if (typeof window === 'undefined' || !location?.search) return new Set();
         
         const params = new URLSearchParams(location.search);
@@ -26,7 +25,7 @@ const RoomsPage = ({ location }) => {
         if (hideParam) {
             try {
                 // Support both comma-separated list and JSON array
-                let teamIds;
+                let teamIds: unknown[];
                 if (hideParam.startsWith('[') && hideParam.endsWith(']')) {
                     teamIds = JSON.parse(hideParam);
                 } else {
@@ -35,7 +34,7 @@ const RoomsPage = ({ location }) => {
                 
                 // Convert to numbers and filter valid ones
                 const validIds = teamIds
-                    .map(id => parseInt(id, 10))
+                    .map(id => parseInt(String(id), 10))
                     .filter(id => !isNaN(id));
                 
                 return new Set(validIds);
@@ -52,9 +51,9 @@ const RoomsPage = ({ location }) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await scheduleApiClient.getRooms({ force });
+            const data = await scheduleApi.getRooms({ force });
             setRoomData(data || []);
-            setLastUpdated(scheduleApiClient.roomsFetchedAt() || new Date());
+            setLastUpdated(scheduleApi.roomsFetchedAt() || new Date());
             toast.success('Room assignments updated successfully!');
         } catch (err) {
             console.error('Error fetching room assignments:', err);
@@ -74,7 +73,7 @@ const RoomsPage = ({ location }) => {
             setTimeout(() => {
                 // Get existing hidden teams from localStorage
                 const storedHiddenTeams = localStorage.getItem('hiddenRoomTeams');
-                let existingHidden = new Set();
+                let existingHidden = new Set<number>();
                 
                 if (storedHiddenTeams) {
                     try {
@@ -215,7 +214,7 @@ const RoomsPage = ({ location }) => {
                             >
                                 {loading ? (
                                     <>
-                                        <Spinner size="sm" className="me-2" />
+                                        <Spinner animation="border" size="sm" className="me-2" />
                                         Refreshing...
                                     </>
                                 ) : (
@@ -314,4 +313,4 @@ const RoomsPage = ({ location }) => {
 
 export default RoomsPage;
 
-export const Head = () => <title>Room Assignments - FLL Scoreboard</title>
+export const Head: HeadFC = () => <title>Room Assignments - FLL Scoreboard</title>

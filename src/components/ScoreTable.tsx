@@ -1,17 +1,34 @@
 import React from "react"
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Table, Button, Card } from "react-bootstrap";
 import { navigate } from "gatsby";
-import { settingsContext } from "../contexts/settingsContext";
+import { useSettings } from "../contexts/settingsContext";
+import type { DisplayTeamScoresResponse } from "../api";
 import "../mobile.css";
 
-export default function ScoreTable({teamData, refreshData}){
-    const [mutapleTeamData, setMutapleTeamData] = useState([...teamData])
-    const [settings, setSettings] = useContext(settingsContext)
+interface ScoreTableProps {
+    teamData: DisplayTeamScoresResponse[];
+    refreshData: () => void;
+}
+
+interface Row {
+    number: number;
+    name: string;
+    /** Comma-separated scores. */
+    scores: string;
+    /** Average of the top `divisor` scores; -1 without scores. */
+    average: number;
+    displayAverage: string | number;
+    place: number;
+}
+
+export default function ScoreTable({teamData, refreshData}: ScoreTableProps){
+    const [mutapleTeamData, setMutapleTeamData] = useState<Row[]>([])
+    const [settings] = useSettings()
     const [divisorHeader, setDivisorHeader] = useState("")
     const [mapIndex, setMapIndex] = useState(0);
-    const size = settings.tableSize || 10;
-    
+    const size = Number(settings.tableSize) || 10;
+
 
     useEffect(() => {
         let temp = ""
@@ -35,39 +52,27 @@ export default function ScoreTable({teamData, refreshData}){
     }, [settings])
 
     useEffect(() => {
-        let teams = teamData.map((item, index) => {
-            let temp = {
+        const teams = teamData.map((item) => {
+            let average = -1
+            let displayAverage: string | number = -1
+            if(item.scores.length > 0){
+                const orderScores = [...item.scores].sort((a,b) => a-b).reverse().slice(0, settings.divisor);
+                average = orderScores.reduce((a,b) => a+b) / orderScores.length;
+                displayAverage = average.toFixed(3)
+            }
+            return {
                 number: item.team_id,
                 name: item.team_name,
                 scores: item.scores.toString(),
+                average,
+                displayAverage,
             }
-            
-            if(item.scores.length > 0){
-                let orderScores = [...item.scores].sort((a,b) => a-b).reverse().slice(0, settings.divisor);
-                orderScores = orderScores.reduce((a,b) => a+b) / orderScores.length;
-                console.log(orderScores)
-                temp["average"] = orderScores;
-                temp["displayAverage"] = orderScores.toFixed(3)    
-            } else {
-                temp["average"] = -1
-                temp["displayAverage"] = -1
-            }
-            return temp
         })
 
-        teams = teams.sort(function (a, b){
-            return b.average - a.average
-        })
+        teams.sort((a, b) => b.average - a.average)
 
-        teams = teams.map((item, index) => {
-            item["place"] = index + 1
-            return item
-        })
-
-        console.log(teams)
-        
         setMutapleTeamData(
-            teams
+            teams.map((item, index) => ({ ...item, place: index + 1 }))
         )
     }, [teamData])
 
@@ -83,7 +88,7 @@ export default function ScoreTable({teamData, refreshData}){
         return () => clearTimeout(timeout)
     }, [mutapleTeamData, mapIndex])
 
-    const handleTeamClick = (teamNumber) => {
+    const handleTeamClick = (teamNumber: number) => {
         navigate(`/team?id=${teamNumber}`);
     };
 
@@ -105,20 +110,20 @@ export default function ScoreTable({teamData, refreshData}){
                 <tbody>
                     {displayData.map((item, index) => {
                         return <tr key={index}>
-                            <td>{item['place']}</td>
+                            <td>{item.place}</td>
                             <td>
-                                <Button 
-                                    variant="link" 
+                                <Button
+                                    variant="link"
                                     className="team-number-link"
-                                    onClick={() => handleTeamClick(item['number'])}
-                                    title={`View details for Team #${item['number']}`}
+                                    onClick={() => handleTeamClick(item.number)}
+                                    title={`View details for Team #${item.number}`}
                                 >
-                                    #{item['number']}
+                                    #{item.number}
                                 </Button>
                             </td>
-                            <td>{item['name']}</td>
-                            <td>{item['scores']}</td>
-                            <td>{item["displayAverage"]}</td>
+                            <td>{item.name}</td>
+                            <td>{item.scores}</td>
+                            <td>{item.displayAverage}</td>
                         </tr>
                     })}
                 </tbody>
@@ -139,7 +144,7 @@ export default function ScoreTable({teamData, refreshData}){
                                 </div>
                                 <div className="mobile-team-rank">#{item.place}</div>
                             </div>
-                            
+
                             <div className="mobile-team-stats">
                                 <div className="mobile-stat">
                                     <div className="mobile-stat-label">Average Score</div>
@@ -150,7 +155,7 @@ export default function ScoreTable({teamData, refreshData}){
                                     <div className="mobile-stat-value">{item.scores ? item.scores.split(',').length : 0}</div>
                                 </div>
                             </div>
-                            
+
                             <div className="mobile-team-stats" style={{gridTemplateColumns: '1fr'}}>
                                 <div className="mobile-stat">
                                     <div className="mobile-stat-label">Recent Scores</div>
@@ -159,11 +164,11 @@ export default function ScoreTable({teamData, refreshData}){
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <Button
                                 variant="outline-primary"
                                 className="mobile-team-button"
-                                onClick={() => handleTeamClick(item['number'])}
+                                onClick={() => handleTeamClick(item.number)}
                             >
                                 View Team Details
                             </Button>

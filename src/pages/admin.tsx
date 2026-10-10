@@ -1,64 +1,34 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Form, Modal, Alert, Row, Col, InputGroup } from 'react-bootstrap';
-import { navigate } from 'gatsby';
+import { navigate, type GetServerDataReturn, type HeadFC } from 'gatsby';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmarkCircle, faCheckCircle } from '@fortawesome/free-regular-svg-icons';
-import { settingsContext } from '../contexts/settingsContext';
-import { Team_API_Client, Display_API_Client, Score_API_Client } from '../api';
+import { defaultSettings, settingsContext, storedPassword, type Settings } from '../contexts/settingsContext';
+import { displayApi, errorMessage, scoreApi, type DisplayTeamScoresResponse } from '../api';
+import usePasswordCheck from '../hooks/usePasswordCheck';
 import toast, { Toaster } from 'react-hot-toast';
 import '../App.css';
 import '../mobile.css';
 
-const AdminPage = ({ serverData }) => {
-    const [settings, setSettings] = useState({
-        backendUrl: process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000",
-        password: typeof window !== 'undefined' ? localStorage.getItem("password") || "" : "",
-        divisor: parseInt(process.env.GATSBY_DIVISOR) || 3,
-    });
+const AdminPage = () => {
+    const [settings, setSettings] = useState<Settings>(() => ({ ...defaultSettings(), password: storedPassword() }));
 
-    const [teamData, setTeamData] = useState([]);
+    const [teamData, setTeamData] = useState<DisplayTeamScoresResponse[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [isPasswordValid, setIsPasswordValid] = useState(false);
-    const [passwordChecked, setPasswordChecked] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { isPasswordValid, passwordChecked } = usePasswordCheck(settings.password);
     
     // Modal state
     const [showAddScoreModal, setShowAddScoreModal] = useState(false);
-    const [selectedTeam, setSelectedTeam] = useState(null);
+    const [selectedTeam, setSelectedTeam] = useState<DisplayTeamScoresResponse | null>(null);
     const [newScore, setNewScore] = useState('');
-
-    const teamApiClient = new Team_API_Client();
-    const displayApiClient = new Display_API_Client();
-    const scoreApiClient = new Score_API_Client();
-
-    // Check password validity
-    useEffect(() => {
-        const checkPassword = async () => {
-            if (settings.password) {
-                try {
-                    const result = await displayApiClient.checkDisplayPassword(settings.password);
-                    setIsPasswordValid(result.status || result.success || result.valid || false);
-                } catch (err) {
-                    console.error('Error checking password:', err);
-                    setIsPasswordValid(false);
-                } finally {
-                    setPasswordChecked(true);
-                }
-            } else {
-                setPasswordChecked(true);
-                setIsPasswordValid(false);
-            }
-        };
-
-        checkPassword();
-    }, [settings.password]);
 
     // Fetch all team data
     const fetchTeamData = async () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await displayApiClient.getDisplay();
+            const data = await displayApi.getDisplay();
             setTeamData(data || []);
         } catch (err) {
             console.error('Error fetching team data:', err);
@@ -76,13 +46,13 @@ const AdminPage = ({ serverData }) => {
         navigate('/scoreboard');
     };
 
-    const handlePasswordChange = (e) => {
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPassword = e.target.value;
         setSettings(prev => ({ ...prev, password: newPassword }));
         localStorage.setItem("password", newPassword);
     };
 
-    const openAddScoreModal = (team) => {
+    const openAddScoreModal = (team: DisplayTeamScoresResponse) => {
         setSelectedTeam(team);
         setNewScore('');
         setShowAddScoreModal(true);
@@ -95,7 +65,7 @@ const AdminPage = ({ serverData }) => {
     };
 
     const handleAddScore = async () => {
-        if (!selectedTeam || !newScore || isNaN(newScore)) {
+        if (!selectedTeam || !newScore || isNaN(Number(newScore))) {
             toast.error('Please enter a valid score');
             return;
         }
@@ -107,22 +77,22 @@ const AdminPage = ({ serverData }) => {
 
         try {
             const score = parseInt(newScore);
-            const result = await scoreApiClient.addScore(selectedTeam.team_id, score, settings.password);
+            const result = await scoreApi.addScore(selectedTeam.team_id, score, settings.password);
             
             if (result.team_id === selectedTeam.team_id && result.score === score) {
                 toast.success(`Added score ${score} to Team #${selectedTeam.team_id} (${selectedTeam.team_name})`);
                 await fetchTeamData(); // Refresh data
                 closeAddScoreModal();
             } else {
-                throw new Error(result.message || 'Failed to add score');
+                throw new Error('Failed to add score');
             }
         } catch (err) {
             console.error('Error adding score:', err);
-            toast.error(err.message || 'Failed to add score');
+            toast.error(errorMessage(err) || 'Failed to add score');
         }
     };
 
-    const handleRemoveScore = async (team, scoreToRemove) => {
+    const handleRemoveScore = async (team: DisplayTeamScoresResponse, scoreToRemove: number) => {
         if (!isPasswordValid) {
             toast.error('Please enter a valid password');
             return;
@@ -130,22 +100,22 @@ const AdminPage = ({ serverData }) => {
 
         if (window.confirm(`Remove score ${scoreToRemove} from Team #${team.team_id} (${team.team_name})?`)) {
             try {
-                const result = await scoreApiClient.removeScore(team.team_id, scoreToRemove, settings.password);
+                const result = await scoreApi.removeScore(team.team_id, scoreToRemove, settings.password);
                 
                 if (result.detail) {
                     toast.success(`Removed score ${scoreToRemove} from Team #${team.team_id}`);
                     await fetchTeamData(); // Refresh data
                 } else {
-                    throw new Error(result.message || 'Failed to remove score');
+                    throw new Error('Failed to remove score');
                 }
             } catch (err) {
                 console.error('Error removing score:', err);
-                toast.error(err.message || 'Failed to remove score');
+                toast.error(errorMessage(err) || 'Failed to remove score');
             }
         }
     };
 
-    const calculateTeamAverage = (scores) => {
+    const calculateTeamAverage = (scores: number[]) => {
         if (!scores || scores.length === 0) return 0;
         const sortedScores = [...scores].sort((a, b) => b - a).slice(0, settings.divisor);
         return (sortedScores.reduce((a, b) => a + b, 0) / sortedScores.length).toFixed(3);
@@ -327,7 +297,7 @@ const AdminPage = ({ serverData }) => {
                         <Button 
                             variant="primary" 
                             onClick={handleAddScore}
-                            disabled={!newScore || isNaN(newScore)}
+                            disabled={!newScore || isNaN(Number(newScore))}
                         >
                             Add Score
                         </Button>
@@ -342,10 +312,10 @@ const AdminPage = ({ serverData }) => {
 
 export default AdminPage;
 
-export const Head = () => <title>Admin Panel - FLL Scoreboard</title>;
+export const Head: HeadFC = () => <title>Admin Panel - FLL Scoreboard</title>;
 
 // Server-side rendering function
-export async function getServerData(context) {
+export async function getServerData(): Promise<GetServerDataReturn> {
   try {
     // You can fetch initial data here on the server
     const backendUrl = process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000";

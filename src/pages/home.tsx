@@ -1,18 +1,15 @@
 import * as React from "react"
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, InputGroup } from 'react-bootstrap';
-import { navigate } from 'gatsby';
-import { Display_API_Client } from '../api';
+import { navigate, type HeadFC } from 'gatsby';
+import usePasswordCheck from '../hooks/usePasswordCheck';
 import '../App.css';
 import '../mobile.css';
 
 const IndexPage = () => {
     const [teamNumber, setTeamNumber] = useState('');
-    const [isPasswordValid, setIsPasswordValid] = useState(false);
-    const [passwordChecked, setPasswordChecked] = useState(false);
-    
-    const displayApiClient = new Display_API_Client();
     const [password, setPassword] = useState('');
+    const { isPasswordValid } = usePasswordCheck(password);
 
     useEffect(() => {
         // Only access localStorage on the client side
@@ -21,34 +18,6 @@ const IndexPage = () => {
             setPassword(storedPassword);
         }
     }, []);
-
-    // Check password validity on component mount
-    useEffect(() => {
-        // Only run on client side to avoid SSR issues
-        if (typeof window === 'undefined') {
-            setPasswordChecked(true);
-            return;
-        }
-
-        const checkPassword = async () => {
-            if (password) {
-                try {
-                    const result = await displayApiClient.checkDisplayPassword(password);
-                    setIsPasswordValid(result.status || result.success || result.valid || false);
-                } catch (err) {
-                    console.error('Error checking password:', err);
-                    setIsPasswordValid(false);
-                } finally {
-                    setPasswordChecked(true);
-                }
-            } else {
-                setPasswordChecked(true);
-                setIsPasswordValid(false);
-            }
-        };
-
-        checkPassword();
-    }, [password]);
 
     const menuItems = [
         {
@@ -89,11 +58,11 @@ const IndexPage = () => {
         }
     ];
 
-    const handleNavigation = (path) => {
+    const handleNavigation = (path: string) => {
         navigate(path);
     };
 
-    const handleTeamNavigation = (e) => {
+    const handleTeamNavigation = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const trimmedNumber = teamNumber.trim();
         
@@ -105,7 +74,7 @@ const IndexPage = () => {
         }
     };
 
-    const handleTeamInputChange = (e) => {
+    const handleTeamInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTeamNumber(e.target.value);
     };
 
@@ -224,4 +193,4 @@ const IndexPage = () => {
 
 export default IndexPage
 
-export const Head = () => <title>FLL Scoreboard - Main Menu</title>
+export const Head: HeadFC = () => <title>FLL Scoreboard - Main Menu</title>

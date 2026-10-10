@@ -1,16 +1,22 @@
-import React from 'react';
+import React, { type ErrorInfo, type ReactNode } from 'react';
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+interface Props {
+  children?: ReactNode;
+}
 
-  static getDerivedStateFromError(error) {
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<Props, State> {
+  state: State = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
@@ -22,8 +28,8 @@ class ErrorBoundary extends React.Component {
             <h4 className="alert-heading">Something went wrong!</h4>
             <p>We're having trouble loading the application. Please try refreshing the page.</p>
             <hr />
-            <button 
-              className="btn btn-primary" 
+            <button
+              className="btn btn-primary"
               onClick={() => window.location.reload()}
             >
               Refresh Page

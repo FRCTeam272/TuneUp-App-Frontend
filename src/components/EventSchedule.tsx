@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Button, Form, Container } from 'react-bootstrap';
 import { Link, navigate } from 'gatsby';
-import { Schedule_API_Client } from '../api';
+import { scheduleApi, type ScheduleEntry, type ScheduleResponse } from '../api';
 
-const EventSchedule = ({ scheduleData }) => {
-    const [hiddenEvents, setHiddenEvents] = useState(new Set());
+interface EventScheduleProps {
+    scheduleData: ScheduleResponse[];
+}
+
+const EventSchedule = ({ scheduleData }: EventScheduleProps) => {
+    const [hiddenEvents, setHiddenEvents] = useState(new Set<string>());
     const [showHidden, setShowHidden] = useState(false);
     
     // Rooms map fetched from backend: { [team_id]: room }
-    const [roomsMap, setRoomsMap] = useState({});
+    const [roomsMap, setRoomsMap] = useState<Record<string, string>>({});
 
     // Load hidden events from localStorage on component mount
     useEffect(() => {
@@ -18,7 +22,7 @@ const EventSchedule = ({ scheduleData }) => {
             
             if (storedHiddenEvents) {
                 try {
-                    const hiddenArray = JSON.parse(storedHiddenEvents);
+                    const hiddenArray: string[] = JSON.parse(storedHiddenEvents);
                     setHiddenEvents(new Set(hiddenArray));
                 } catch (error) {
                     console.error('Error parsing stored hidden events:', error);
@@ -48,44 +52,18 @@ const EventSchedule = ({ scheduleData }) => {
 
     // Fetch room numbers from API once on mount
     useEffect(() => {
-        const client = new Schedule_API_Client();
-        client.getRooms()
+        scheduleApi.getRooms()
             .then((data) => {
-                if (!data) return;
-
-                const map = {};
-
-                // If API returns an array of room objects
-                if (Array.isArray(data)) {
-                    data.forEach((item) => {
-                        // support possible shapes: { team_id, room } or { id, room }
-                        if (item.team_id !== undefined) map[String(item.team_id)] = item.room;
-                        else if (item.id !== undefined) map[String(item.id)] = item.room;
-                    });
-                } else if (typeof data === 'object') {
-                    // support { rooms: [...] }
-                    if (Array.isArray(data.rooms)) {
-                        data.rooms.forEach((item) => {
-                            if (item.team_id !== undefined) map[String(item.team_id)] = item.room;
-                            else if (item.id !== undefined) map[String(item.id)] = item.room;
-                        });
-                    } else {
-                        // assume it's already a mapping { team_id: room }
-                        Object.keys(data).forEach((k) => {
-                            map[String(k)] = data[k];
-                        });
-                    }
-                }
-
+                const map: Record<string, string> = {};
+                data.forEach((item) => {
+                    map[String(item.team_id)] = item.room;
+                });
                 setRoomsMap(map);
             })
             .catch((err) => console.error('Error fetching rooms:', err));
     }, []);
 
-    // Helper to resolve a room for a team (prefer explicit team.room)
-    const resolveRoom = (team) => {
-        if (!team) return 'TBD';
-        if (team.room !== undefined && team.room !== null && String(team.room).trim() !== '') return team.room;
+    const resolveRoom = (team: ScheduleEntry) => {
         const mapped = roomsMap[String(team.team_id)];
         return mapped !== undefined ? mapped : 'TBD';
     };
@@ -110,11 +88,11 @@ const EventSchedule = ({ scheduleData }) => {
     const sortedEvents = [...scheduleData].sort((a, b) => {
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
-        return dateA - dateB;
+        return dateA.getTime() - dateB.getTime();
     });
 
 
-    const formatTime = (dateString) => {
+    const formatTime = (dateString: string) => {
         try {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) {
@@ -133,13 +111,13 @@ const EventSchedule = ({ scheduleData }) => {
     };
 
     // Create a unique identifier for each event based on date and team info
-    const createEventId = (event) => {
+    const createEventId = (event: ScheduleResponse) => {
         const dateStr = event.date;
         const teamIds = event.info ? event.info.map(team => team.team_id).sort().join(',') : '';
         return `${dateStr}-${teamIds}`;
     };
 
-    const toggleEventVisibility = (eventId) => {
+    const toggleEventVisibility = (eventId: string) => {
         const newHiddenEvents = new Set(hiddenEvents);
         if (hiddenEvents.has(eventId)) {
             newHiddenEvents.delete(eventId);

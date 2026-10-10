@@ -1,27 +1,26 @@
 import * as React from "react"
 import { useState, useEffect } from 'react';
 import { Button, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { navigate } from 'gatsby';
+import { navigate, type HeadFC } from 'gatsby';
 import toast, { Toaster } from 'react-hot-toast';
 import EventSchedule from '../components/EventSchedule';
-import { Schedule_API_Client } from "../api";
+import { scheduleApi, type ScheduleResponse } from "../api";
 import '../App.css';
 import '../mobile.css';
 
 const SchedulePage = () => {
-    const scheduleApiClient = new Schedule_API_Client();
-    const [scheduleData, setScheduleData] = useState([]);
+    const [scheduleData, setScheduleData] = useState<ScheduleResponse[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [lastUpdated, setLastUpdated] = useState(null);
+    const [error, setError] = useState<string | null>(null);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
     const fetchSchedule = async (force = false) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await scheduleApiClient.getSchedule({ force });
+            const data = await scheduleApi.getSchedule({ force });
             setScheduleData(data || []);
-            setLastUpdated(scheduleApiClient.scheduleFetchedAt() || new Date());
+            setLastUpdated(scheduleApi.scheduleFetchedAt() || new Date());
             toast.success('Schedule updated successfully!');
         } catch (err) {
             console.error('Error fetching schedule:', err);
@@ -85,7 +84,7 @@ const SchedulePage = () => {
                             >
                                 {loading ? (
                                     <>
-                                        <Spinner size="sm" className="me-2" />
+                                        <Spinner animation="border" size="sm" className="me-2" />
                                         Refreshing...
                                     </>
                                 ) : (
@@ -156,4 +155,4 @@ const SchedulePage = () => {
 
 export default SchedulePage;
 
-export const Head = () => <title>Event Schedule - FLL Scoreboard</title>
+export const Head: HeadFC = () => <title>Event Schedule - FLL Scoreboard</title>

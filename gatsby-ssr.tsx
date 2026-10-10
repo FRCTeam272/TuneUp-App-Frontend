@@ -1,12 +1,13 @@
 import React from "react"
+import type { GatsbySSR } from "gatsby"
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 // Wrap the root element with ErrorBoundary for SSR
-export const wrapRootElement = ({ element }) => (
+export const wrapRootElement: GatsbySSR['wrapRootElement'] = ({ element }) => (
   <ErrorBoundary>{element}</ErrorBoundary>
 );
 
-export const onRenderBody = ({ setHeadComponents }) => {
+export const onRenderBody: GatsbySSR['onRenderBody'] = ({ setHeadComponents }) => {
   setHeadComponents([
     <meta
       key="viewport"

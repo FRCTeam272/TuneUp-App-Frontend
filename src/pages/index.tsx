@@ -1,5 +1,5 @@
 import * as React from "react"
-import { navigate } from 'gatsby';
+import { navigate, type HeadFC } from 'gatsby';
 
 const RealIndexPage = () => {
   React.useEffect(() => {
@@ -11,4 +11,4 @@ const RealIndexPage = () => {
 
 export default RealIndexPage;
 
-export const Head = () => <title>Index</title>
+export const Head: HeadFC = () => <title>Index</title>

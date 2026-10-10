@@ -1,14 +1,45 @@
 import React, { useState } from 'react';
 import { navigate } from 'gatsby';
 import { Card, Table, Badge, Row, Col, ProgressBar, Button, Form } from 'react-bootstrap';
+import type { DisplayTeamScoresResponse, EventBase } from '../api';
 
-const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTeams = [], divisor = 3 }) => {
-    const [sortBy, setSortBy] = useState('average'); // average, highest, total_rounds, team_number
-    const [sortOrder, setSortOrder] = useState('desc'); // asc, desc
+type Trend = 'improving' | 'declining' | 'stable' | 'insufficient-data';
+type SortBy = 'average' | 'highest' | 'total_rounds' | 'team_number';
+type EventType = 'Judging' | 'Robot Match' | 'Practice' | 'Event';
+
+interface ProcessedTeam {
+    teamId: number;
+    teamName: string;
+    allScores: number[];
+    sortedScores: number[];
+    topScores: number[];
+    average: number;
+    highestScore: number;
+    lowestScore: number;
+    totalRounds: number;
+    improvementTrend: Trend;
+}
+
+interface TeamEvent extends EventBase {
+    teamId: number;
+    eventType: EventType;
+}
+
+interface MultiTeamComparisonProps {
+    selectedTeams: number[];
+    teamData: Record<number, DisplayTeamScoresResponse>;
+    scheduleData?: Record<number, EventBase[]>;
+    allTeams?: DisplayTeamScoresResponse[];
+    divisor?: number;
+}
+
+const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTeams = [], divisor = 3 }: MultiTeamComparisonProps) => {
+    const [sortBy, setSortBy] = useState<SortBy>('average');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [showAllScores, setShowAllScores] = useState(false);
-    const [hiddenEvents, setHiddenEvents] = useState(new Set());
+    const [hiddenEvents, setHiddenEvents] = useState(new Set<string>());
 
-    const processTeamData = (team) => {
+    const processTeamData = (team: DisplayTeamScoresResponse | undefined): ProcessedTeam | null => {
         if (!team) return null;
 
         const scores = team.scores || [];
@@ -31,7 +62,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         };
     };
 
-    const calculateTrend = (scores) => {
+    const calculateTrend = (scores: number[]): Trend => {
         if (scores.length < 2) return 'insufficient-data';
         
         const recentScores = scores.slice(-3); // Last 3 scores
@@ -49,7 +80,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         return 'stable';
     };
 
-    const getTrendBadge = (trend) => {
+    const getTrendBadge = (trend: Trend) => {
         switch (trend) {
             case 'improving':
                 return <Badge bg="success">📈 Improving</Badge>;
@@ -62,7 +93,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         }
     };
 
-    const getScoreColor = (score, maxScore) => {
+    const getScoreColor = (score: number, maxScore: number) => {
         if (maxScore === 0) return '#6c757d';
         const percentage = (score / maxScore) * 100;
         if (percentage >= 90) return '#198754';
@@ -71,7 +102,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         return '#dc3545';
     };
 
-    const calculateActualRanking = (teamId) => {
+    const calculateActualRanking = (teamId: number) => {
         if (!allTeams || allTeams.length === 0) return null;
         
         // Sort all teams by average score (descending)
@@ -86,14 +117,14 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         return teamIndex !== -1 ? teamIndex + 1 : null;
     };
 
-    const getEventType = (eventName) => {
+    const getEventType = (eventName: string): EventType => {
         if (eventName.includes("Judge")) return 'Judging';
         if (eventName.includes("Round")) return 'Robot Match';
         if (eventName.includes("Morning")) return 'Practice';
         return 'Event';
     };
 
-    const getEventId = (event) => {
+    const getEventId = (event: TeamEvent) => {
         // Create a more reliable ID by including index or using a hash of the event details
         const teamId = event.teamId || 'unknown';
         const name = event.name || 'unnamed';
@@ -101,7 +132,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         return `${teamId}-${name.replace(/[^a-zA-Z0-9]/g, '_')}-${date.replace(/[^a-zA-Z0-9]/g, '_')}`;
     };
 
-    const toggleEventVisibility = (eventId) => {
+    const toggleEventVisibility = (eventId: string) => {
         console.log('Toggling event:', eventId);
         console.log('Current hidden events:', Array.from(hiddenEvents));
         const newHiddenEvents = new Set(hiddenEvents);
@@ -120,7 +151,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
         // Hide all events that have passed (assuming current time)
         const now = new Date();
         Object.entries(scheduleData)
-            .flatMap(([teamId, schedule]) => {
+            .flatMap(([teamId, schedule]): TeamEvent[] => {
                 if (!schedule || !Array.isArray(schedule)) return [];
                 return schedule.map(event => ({
                     ...event,
@@ -146,11 +177,11 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
             const team = teamData[teamId];
             return processTeamData(team);
         })
-        .filter(team => team !== null);
+        .filter((team): team is ProcessedTeam => team !== null);
 
     // Sort teams based on selected criteria
     const sortedTeams = [...processedTeams].sort((a, b) => {
-        let valueA, valueB;
+        let valueA: number, valueB: number;
         
         switch (sortBy) {
             case 'average':
@@ -186,7 +217,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
     const maxHighest = Math.max(...processedTeams.map(t => t.highestScore));
     const maxRounds = Math.max(...processedTeams.map(t => t.totalRounds));
 
-    const handleSortChange = (newSortBy) => {
+    const handleSortChange = (newSortBy: SortBy) => {
         if (sortBy === newSortBy) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
@@ -472,27 +503,25 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
                                     {Object.entries(scheduleData)
                                         .flatMap(([teamId, schedule]) => {
                                             if (!schedule || !Array.isArray(schedule)) return [];
-                                            return schedule.map((event, eventIndex) => {
+                                            return schedule.map((event) => {
                                                 const enrichedEvent = {
                                                     ...event,
                                                     teamId: parseInt(teamId),
                                                     teamName: processedTeams.find(t => t.teamId === parseInt(teamId))?.teamName || `Team #${teamId}`,
                                                     eventType: getEventType(event.name)
                                                 };
-                                                enrichedEvent.eventId = getEventId(enrichedEvent);
-                                                return enrichedEvent;
+                                                return { ...enrichedEvent, eventId: getEventId(enrichedEvent) };
                                             });
                                         })
                                         .filter(event => !hiddenEvents.has(event.eventId))
                                         .sort((a, b) => {
                                             // Sort by time if available, otherwise by team number
                                             if (a.date && b.date) {
-                                                return new Date(a.date) - new Date(b.date);
+                                                return new Date(a.date).getTime() - new Date(b.date).getTime();
                                             }
                                             return a.teamId - b.teamId;
                                         })
                                         .map((event, index) => {
-                                            console.log('Rendering event:', event.eventId, 'Hidden:', hiddenEvents.has(event.eventId));
                                             return (
                                             <tr key={event.eventId || `${event.teamId}-${index}`}>
                                                 <td className="team-cell">
@@ -505,7 +534,6 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
                                                     <br></br>
                                                     <small>{event.date ? new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD'}</small>
                                                 </td>
-                                                {console.log("event", event)}
                                                 <td>
                                                     <Badge 
                                                         bg={
@@ -518,9 +546,6 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
                                                     >
                                                         {event.eventType}
                                                     </Badge>
-                                                    {event.round && (
-                                                        <small className="text-muted">Round {event.round}</small>
-                                                    )}
                                                 </td>
                                                 <td>
                                                     {event.name.split(":")[1]}
@@ -541,7 +566,7 @@ const MultiTeamComparison = ({ selectedTeams, teamData, scheduleData = {}, allTe
                                     {Object.keys(scheduleData).length > 0 && 
                                      Object.values(scheduleData).every(schedule => !schedule || schedule.length === 0) && (
                                         <tr>
-                                            <td colSpan="5" className="text-center text-muted py-4">
+                                            <td colSpan={5} className="text-center text-muted py-4">
                                                 {Object.values(scheduleData).some(schedule => schedule && schedule.length > 0) ? 
                                                     'All events are hidden. Click "Show All" above to see them.' :
                                                     'No schedule events found for selected teams'}

@@ -1,10 +1,14 @@
-import React, { useState, useEffect,  } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Button, Form, Container } from 'react-bootstrap';
 import { navigate } from 'gatsby';
+import type { RoomAssignmentResponse } from '../api';
 
+interface RoomAssignmentsProps {
+    roomData: RoomAssignmentResponse[];
+}
 
-const RoomAssignments = ({ roomData }) => {
-    const [hiddenTeams, setHiddenTeams] = useState(new Set());
+const RoomAssignments = ({ roomData }: RoomAssignmentsProps) => {
+    const [hiddenTeams, setHiddenTeams] = useState(new Set<number>());
     const [showHidden, setShowHidden] = useState(false);
     const [judgeView, setJudgeView] = useState(false);
     const [selectedJudgeGroup, setSelectedJudgeGroup] = useState('all');
@@ -28,7 +32,7 @@ const RoomAssignments = ({ roomData }) => {
                 
                 if (storedHiddenTeams) {
                     try {
-                        const hiddenArray = JSON.parse(storedHiddenTeams);
+                        const hiddenArray: number[] = JSON.parse(storedHiddenTeams);
                         setHiddenTeams(new Set(hiddenArray));
                     } catch (error) {
                         console.error('Error parsing stored hidden teams:', error);
@@ -57,16 +61,14 @@ const RoomAssignments = ({ roomData }) => {
         loadFromStorage();
 
         // Listen for storage events (for URL sharing updates)
-        const handleStorageChange = (e) => {
-            if (e.key === 'hiddenRoomTeams' || e.type === 'storage') {
+        // rooms.tsx dispatches a plain Event('storage') after merging hidden teams from the URL.
+        const handleStorageChange = (e: Event) => {
+            if ((e instanceof StorageEvent && e.key === 'hiddenRoomTeams') || e.type === 'storage') {
                 loadFromStorage();
             }
         };
 
         if (isClient && typeof window !== 'undefined') {
-            window.addEventListener('storage', handleStorageChange);
-            
-            // Also listen for custom events (for same-window updates)
             window.addEventListener('storage', handleStorageChange);
         }
 
@@ -164,7 +166,7 @@ const RoomAssignments = ({ roomData }) => {
         }
     });
 
-    const toggleTeamVisibility = (teamId) => {
+    const toggleTeamVisibility = (teamId: number) => {
         const newHiddenTeams = new Set(hiddenTeams);
         if (hiddenTeams.has(teamId)) {
             newHiddenTeams.delete(teamId);

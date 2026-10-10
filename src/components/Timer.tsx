@@ -1,21 +1,21 @@
 import React from "react"
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { settingsContext } from "../contexts/settingsContext";
-import { useSound } from "use-sound";
+import { useSettings } from "../contexts/settingsContext";
+import useSound from "use-sound";
 import dingSound from '../../static/timerding.mp3'
 import "../mobile.css"
-export function minutesToSeconds(time){
+export function minutesToSeconds(time: string): number {
     if(time.includes(":")){
       const [min, second] = time.split(":");
       return Number(min) * 60 + Number(second)
     }
-  
+
     return Number(time)
 }
-  
-function secondsToMins(time){
-    let min = Number((time / 60).toString().split(".")[0])
+
+function secondsToMins(time: number): string {
+    let min = Math.floor(time / 60)
     let second = time % 60;
     if(second > 9){
         return `${min}:${second}`
@@ -23,19 +23,14 @@ function secondsToMins(time){
     else {
         return `${min}:0${second}`
     }
-    
+
 }
 
 export default function Timer(){
-    const [settings, setSettings] = useContext(settingsContext);
+    const [settings] = useSettings();
     const [ding] = useSound(dingSound)
     const [humanReadableTime, setHumanReadableTime] = useState(settings.timer);
-    const [showRealTime, setShowRealTime] = useState(settings.showTime);
     const [time, setTime] = useState(new Date().toLocaleTimeString())
-
-    useEffect(() => {
-        console.log(settings.showTime)
-    }, [settings.showTime])
 
     const [ticking, setTicking] = useState(false);
     const [count, setCount] = useState(minutesToSeconds(settings.timer));
@@ -63,8 +58,10 @@ export default function Timer(){
         setCount(minutesToSeconds(settings.timer))
     }, [ticking])
 
+    // New settings reset and stop the timer.
     useEffect(() => {
-        setCount(settings.timer)
+        setCount(minutesToSeconds(settings.timer))
+        setTicking(false)
     }, [settings])
 
     return <>

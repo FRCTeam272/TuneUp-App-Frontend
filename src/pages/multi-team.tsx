@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { navigate } from 'gatsby';
+import { navigate, type HeadFC } from 'gatsby';
 import { Button, Container, Row, Col, Alert, Form, Badge, Card, Table, Spinner } from 'react-bootstrap';
-import { settingsContext } from '../contexts/settingsContext';
-import { Display_API_Client, Team_API_Client } from '../api';
+import { defaultSettings, settingsContext, type Settings } from '../contexts/settingsContext';
+import { displayApi, errorMessage, teamApi, type DisplayTeamScoresResponse, type EventBase } from '../api';
 import MultiTeamComparison from '../components/MultiTeamComparison';
 import '../App.css';
 
 const MultiTeamPage = () => {
-    const [settings, setSettings] = useState({
-        backendUrl: process.env.GATSBY_BACKEND_URL || "http://127.0.0.1:5000",
-        divisor: parseInt(process.env.GATSBY_DIVISOR) || 3,
-    });
+    const [settings, setSettings] = useState<Settings>(defaultSettings);
 
     useEffect(() => {
         setSettings(prevSettings => ({
@@ -19,17 +16,14 @@ const MultiTeamPage = () => {
         }));
     }, []);
 
-    const [selectedTeams, setSelectedTeams] = useState([]);
-    const [allTeams, setAllTeams] = useState([]);
-    const [teamData, setTeamData] = useState({});
-    const [scheduleData, setScheduleData] = useState({});
+    const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
+    const [allTeams, setAllTeams] = useState<DisplayTeamScoresResponse[]>([]);
+    const [teamData, setTeamData] = useState<Record<number, DisplayTeamScoresResponse>>({});
+    const [scheduleData, setScheduleData] = useState<Record<number, EventBase[]>>({});
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [teamInputValue, setTeamInputValue] = useState('');
-
-    const displayApiClient = new Display_API_Client();
-    const teamApiClient = new Team_API_Client();
 
     // Load all teams data
     useEffect(() => {
@@ -39,7 +33,7 @@ const MultiTeamPage = () => {
                 setError(null);
                 
                 // Get all teams from display API
-                const displayData = await displayApiClient.getDisplay();
+                const displayData = await displayApi.getDisplay();
                 console.log('All teams data:', displayData);
                 
                 if (displayData && Array.isArray(displayData)) {
@@ -69,16 +63,16 @@ const MultiTeamPage = () => {
             try {
                 const promises = selectedTeams.map(async (teamId) => {
                     try {
-                        const data = await displayApiClient.getDisplayById(teamId);
-                        return { teamId, data: Array.isArray(data) ? data[0] : data };
+                        const data = await displayApi.getTeamScores(teamId);
+                        return { teamId, data, error: undefined };
                     } catch (err) {
                         console.error(`Error fetching data for team ${teamId}:`, err);
-                        return { teamId, data: null, error: err.message };
+                        return { teamId, data: null, error: errorMessage(err) };
                     }
                 });
 
                 const results = await Promise.all(promises);
-                const newTeamData = {};
+                const newTeamData: Record<number, DisplayTeamScoresResponse> = {};
                 
                 results.forEach(({ teamId, data, error }) => {
                     if (data && !error) {
@@ -97,8 +91,8 @@ const MultiTeamPage = () => {
         fetchSelectedTeamsData();
     }, [selectedTeams]);
 
-    const handleAddTeam = (teamId) => {
-        const id = parseInt(teamId);
+    const handleAddTeam = (teamId: string | number) => {
+        const id = parseInt(String(teamId));
         if (!isNaN(id) && !selectedTeams.includes(id)) {
             const newTeams = [...selectedTeams, id];
             setSelectedTeams(newTeams);
@@ -107,7 +101,7 @@ const MultiTeamPage = () => {
         }
     };
 
-    const handleRemoveTeam = (teamId) => {
+    const handleRemoveTeam = (teamId: number) => {
         const newTeams = selectedTeams.filter(id => id !== teamId);
         setSelectedTeams(newTeams);
         localStorage.setItem('multiTeamSelections', JSON.stringify(newTeams));
@@ -129,7 +123,7 @@ const MultiTeamPage = () => {
         }
     };
 
-    const handleKeyPress = (e) => {
+    const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handleAddTeamFromInput();
         }
@@ -209,16 +203,16 @@ const MultiTeamPage = () => {
             try {
                 const promises = selectedTeams.map(async (teamId) => {
                     try {
-                        const data = await teamApiClient.getSchedule(teamId);
-                        return { teamId, data };
+                        const data = await teamApi.getEvents(teamId);
+                        return { teamId, data, error: undefined };
                     } catch (err) {
                         console.error(`Error fetching schedule for team ${teamId}:`, err);
-                        return { teamId, data: null, error: err.message };
+                        return { teamId, data: null, error: errorMessage(err) };
                     }
                 });
 
                 const results = await Promise.all(promises);
-                const newScheduleData = {};
+                const newScheduleData: Record<number, EventBase[]> = {};
                 
                 results.forEach(({ teamId, data, error }) => {
                     if (data && !error) {
@@ -455,4 +449,4 @@ const MultiTeamPage = () => {
 
 export default MultiTeamPage;
 
-export const Head = () => <title>Multi-Team Comparison - FLL Scoreboard</title>
+export const Head: HeadFC = () => <title>Multi-Team Comparison - FLL Scoreboard</title>

@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Button } from 'react-bootstrap';
+import type { EventBase } from '../api';
 
-const Schedule = ({ scheduleData, teamName, roomNumber }) => {
-    const [hiddenEvents, setHiddenEvents] = useState(new Set());
+interface ScheduleProps {
+    scheduleData: EventBase[];
+    teamName: string;
+    roomNumber: string;
+}
+
+const Schedule = ({ scheduleData, teamName, roomNumber }: ScheduleProps) => {
+    const [hiddenEvents, setHiddenEvents] = useState(new Set<string>());
     const [showHiddenEvents, setShowHiddenEvents] = useState(false);
 
     // Generate unique key for localStorage based on team info
@@ -16,7 +23,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
         const savedHiddenEvents = localStorage.getItem(storageKey);
         if (savedHiddenEvents) {
             try {
-                const hiddenArray = JSON.parse(savedHiddenEvents);
+                const hiddenArray: string[] = JSON.parse(savedHiddenEvents);
                 setHiddenEvents(new Set(hiddenArray));
             } catch (error) {
                 console.error('Error loading hidden events:', error);
@@ -31,14 +38,14 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
     }, [hiddenEvents, teamName]);
 
     // Generate unique event ID
-    const getEventId = (event, index) => {
+    const getEventId = (event: EventBase, index: number) => {
         const name = event.name || `event-${index}`;
-        const time = event.start_time || event.time || event.datetime || event.date || 'no-time';
+        const time = event.date || 'no-time';
         return `${name.replace(/[^a-zA-Z0-9]/g, '_')}-${time.replace(/[^a-zA-Z0-9]/g, '_')}-${index}`;
     };
 
     // Toggle event visibility
-    const toggleEventVisibility = (eventId) => {
+    const toggleEventVisibility = (eventId: string) => {
         const newHiddenEvents = new Set(hiddenEvents);
         if (newHiddenEvents.has(eventId)) {
             newHiddenEvents.delete(eventId);
@@ -60,8 +67,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
         const newHiddenEvents = new Set(hiddenEvents);
         
         scheduleData.forEach((event, index) => {
-            const eventTime = event.start_time || event.time || event.datetime || event.date;
-            if (eventTime && new Date(eventTime) < now) {
+            if (event.date && new Date(event.date) < now) {
                 const eventId = getEventId(event, index);
                 newHiddenEvents.add(eventId);
             }
@@ -83,7 +89,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
         );
     }
 
-    const formatTime = (datetimeString) => {
+    const formatTime = (datetimeString: string) => {
         if (!datetimeString) return 'TBD';
         
         try {
@@ -105,7 +111,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
         }
     };
 
-    const getEventTypeBadge = (eventType) => {
+    const getEventTypeBadge = (eventType?: string) => {
         const type = eventType?.toLowerCase() || '';
         if (type.includes('match') || type.includes('game')) {
             return <Badge bg="primary">Match</Badge>;
@@ -120,12 +126,8 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
         }
     };
 
-    const sortedEvents = [...scheduleData].sort((a, b) => {
-        // Sort by any available time/order field
-        const timeA = a.start_time || a.time || a.order || 0;
-        const timeB = b.start_time || b.time || b.order || 0;
-        return timeA - timeB;
-    });
+    // Kept in the order the API returns them: hidden event ids include the index.
+    const sortedEvents = scheduleData;
 
     return (
         <Card className="mb-4">
@@ -180,8 +182,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
                             .filter(event => showHiddenEvents || !hiddenEvents.has(event.eventId))
                             .map((event) => {
                                 const isHidden = hiddenEvents.has(event.eventId);
-                                const isPast = event.start_time || event.time || event.datetime || event.date ? 
-                                    new Date(event.start_time || event.time || event.datetime || event.date) < new Date() : false;
+                                const isPast = event.date ? new Date(event.date) < new Date() : false;
                                 
                                 return (
                                     <tr 
@@ -191,8 +192,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
                                     >
                                         <td>
                                             <strong>
-                                                {formatTime(event.start_time || event.time || event.datetime || event.date)}
-                                                {event.end_time && ` - ${formatTime(event.end_time)}`}
+                                                {formatTime(event.date)}
                                             </strong>
                                             {isPast && !isHidden && (
                                                 <small className="text-muted d-block">Completed</small>
@@ -226,7 +226,7 @@ const Schedule = ({ scheduleData, teamName, roomNumber }) => {
                             })}
                         {sortedEvents.filter(event => !hiddenEvents.has(getEventId(event, sortedEvents.indexOf(event)))).length === 0 && !showHiddenEvents && (
                             <tr>
-                                <td colSpan="4" className="text-center text-muted py-3">
+                                <td colSpan={4} className="text-center text-muted py-3">
                                     All events are hidden. Click "Show Hidden" to see them.
                                 </td>
                             </tr>
