@@ -10,7 +10,8 @@ const envFile = isDevelopment ? '.env.dev' : '.env'
 
 // Load the appropriate environment file
 dotenv.config({
-  path: path.resolve(process.cwd(), envFile)
+  path: path.resolve(process.cwd(), envFile),
+  quiet: true, // dotenv's "injected env" log shows up as "ERROR UNKNOWN" in Gatsby's output
 })
 
 console.log(`🌍 Loading environment from: ${envFile}`)
@@ -26,7 +27,6 @@ const config: GatsbyConfig = {
     DEV_SSR: isDevelopment // Only enable SSR in development
   },
   plugins: [
-    "gatsby-plugin-styled-components",
     {
       resolve: "gatsby-plugin-manifest",
       options: {
@@ -83,9 +83,11 @@ const config: GatsbyConfig = {
         pathRewrite: {
           "^/api": "",
         },
-        onProxyReq: (proxyReq, req) => {
-          console.log(`🔄 Proxying ${req.method} ${req.url} → ${proxyReq.getHeader('host')}${proxyReq.path}`);
-        }
+        on: {
+          proxyReq: (proxyReq, req) => {
+            console.log(`🔄 Proxying ${req.method} ${req.url} → ${proxyReq.getHeader('host')}${proxyReq.path}`);
+          },
+        },
       })
     );
   },

@@ -7,21 +7,14 @@ import Timer from '../components/Timer';
 import Settings from '../components/Settings';
 import InputForm from '../components/InputForm'
 import ScoreTable from '../components/ScoreTable';
-import styled from 'styled-components';
 import { defaultSettings, settingsContext, type Settings as SettingsValues } from '../contexts/settingsContext';
 import { displayApi, type DisplayTeamScoresResponse } from "../api";
 import '../App.css';
 import '../mobile.css';
 
-const FloatContainer = styled.div`
-  padding: 5px;
-`
-
-const FloatChild = styled.div`
-  width: 50%;
-  float: left;
-  padding: 5px;
-`
+// Desktop layout: score table and score-entry form side by side, split by `offset` percent.
+const floatContainerStyle: React.CSSProperties = { padding: 5 };
+const floatChildStyle: React.CSSProperties = { float: 'left', padding: 5 };
 
 
 
@@ -77,8 +70,8 @@ const ScoreboardPage = () => {
 
             {/* Desktop Layout */}
             <div className="d-none d-lg-block">
-                <FloatContainer>
-                    <FloatChild style={{ width: `${offset}%` }}>
+                <div style={floatContainerStyle}>
+                    <div style={{ ...floatChildStyle, width: `${offset}%` }}>
                         <ScoreTable teamData={teamData} refreshData={refreshData}></ScoreTable>
                         <br />
                         <div className="d-flex gap-2 flex-wrap">
@@ -108,11 +101,11 @@ const ScoreboardPage = () => {
                                 Admin Panel
                             </Button>
                         </div>
-                    </FloatChild>
-                    <FloatChild style={{ width: `${100 - offset}%` }}>
+                    </div>
+                    <div style={{ ...floatChildStyle, width: `${100 - offset}%` }}>
                         {settings.showForm && <InputForm teamData={teamData}></InputForm>}
-                    </FloatChild>
-                </FloatContainer>
+                    </div>
+                </div>
             </div>
 
             {/* Mobile/Tablet Layout */}

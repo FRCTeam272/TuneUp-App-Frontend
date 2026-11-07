@@ -30,11 +30,13 @@ export default function Timer(){
     const [settings] = useSettings();
     const [ding] = useSound(dingSound)
     const [humanReadableTime, setHumanReadableTime] = useState(settings.timer);
-    const [time, setTime] = useState(new Date().toLocaleTimeString())
+    // Empty until mounted: the time at build time never matches the browser's (hydration mismatch).
+    const [time, setTime] = useState('')
 
     const [ticking, setTicking] = useState(false);
     const [count, setCount] = useState(minutesToSeconds(settings.timer));
     useEffect(() => {
+        setTime(new Date().toLocaleTimeString());
         const interval = setInterval(() => {
             setTime(new Date().toLocaleTimeString());
         }, 1000);
