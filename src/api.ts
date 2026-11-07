@@ -22,6 +22,7 @@ import {
     type RankResponse,
     type RoomAssignmentResponse,
     type ScheduleResponse,
+    type TeamContactResponse,
     type TeamDataBulkResponse,
     type TeamSingularResponse,
     type ValidationError,
@@ -39,6 +40,7 @@ export type {
     RankResponse,
     RoomAssignmentResponse,
     ScheduleResponse,
+    TeamContactResponse,
     TeamDataBulkResponse,
     TeamSingularResponse,
 } from './apiClient/generated';
@@ -135,6 +137,12 @@ export const teamApi = {
     getEvents(teamId: number, { force = false }: ForceOption = {}): Promise<EventBase[]> {
         return read(cachedJson(KEYS.roster + `team-events:${teamId}`, () => teams.getEvents({ team_id: teamId }),
             { ttl: LONG_TERM_TTL, force }));
+    },
+
+    /** Admin only (rejects with 403 for a wrong password). Fields are null when the team has no contact on
+     * file. Never cached: it's personal data, and the cache persists to localStorage. */
+    getContact(teamId: number, password: string): Promise<TeamContactResponse> {
+        return read(teams.getContact({ team_id: teamId, password }));
     },
 };
 

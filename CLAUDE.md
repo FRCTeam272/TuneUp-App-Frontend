@@ -1,7 +1,7 @@
 # TuneUp Frontend (FLL Scoreboard)
 
 Gatsby 5 + React 18 + react-bootstrap, all TypeScript (strict), deployed on Netlify (`netlify.toml`:
-Node 18, env vars, redirects). `README.md` is stale CRA boilerplate; `ENVIRONMENT.md` documents env files.
+Node 22, env vars, redirects). `README.md` is stale CRA boilerplate; `ENVIRONMENT.md` documents env files.
 
 ## Commands
 - `npm run develop` — dev server, loads `.env.dev`
@@ -32,6 +32,9 @@ Node 18, env vars, redirects). `README.md` is stale CRA boilerplate; `ENVIRONMEN
   `DisplayClient`, `ScheduleClient` + request/response interfaces). **Never edit by hand.**
 - User prefs (password, hidden teams/events, selections) live in `localStorage`; always guard
   with `typeof window !== 'undefined'` because pages are also rendered at build time (SSR).
+  In **render output**, that guard isn't enough: anything browser-only (query string, `window.location`,
+  localStorage, current time) must wait for `useHasMounted()` (`src/hooks/useHasMounted.ts`), or the
+  first client render differs from the built HTML and React throws a hydration error.
 
 ## Generated API client (NSwag)
 The backend's OpenAPI spec is the contract. To pick up backend changes:

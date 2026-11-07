@@ -38,9 +38,11 @@ interface TeamDetailProps {
     divisor?: number;
     /** All teams, for the nearby-rankings table. */
     rankingData?: DisplayTeamScoresResponse[] | null;
+    /** When set (admins only), the team name becomes a button that calls this, e.g. to show contact info. */
+    onTeamNameClick?: () => void;
 }
 
-const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }: TeamDetailProps) => {
+const TeamDetail = ({ teamData, divisor = 3, rankingData = [], onTeamNameClick }: TeamDetailProps) => {
     const [processedData, setProcessedData] = useState<ProcessedTeam | null>(null);
 
     useEffect(() => {
@@ -190,7 +192,18 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [] }: TeamDetailProps
                     <Row>
                         <Col md={8}>
                             <h1 className="mb-0">Team #{processedData.teamNumber}</h1>
-                            <h3 className="text-light">{processedData.teamName}</h3>
+                            <h3 className="text-light">
+                                {onTeamNameClick ? (
+                                    <button
+                                        type="button"
+                                        className="btn btn-link p-0 text-light fs-3 align-baseline"
+                                        onClick={onTeamNameClick}
+                                        title="Show contact info"
+                                    >
+                                        {processedData.teamName} <span className="fs-5">📇</span>
+                                    </button>
+                                ) : processedData.teamName}
+                            </h3>
                         </Col>
                         <Col md={4} className="text-end">
                             {getTrendBadge(processedData.improvementTrend)}

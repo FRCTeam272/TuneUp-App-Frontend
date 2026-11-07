@@ -324,6 +324,53 @@ export class TeamsClient {
         }
         return Promise.resolve<EventBase[]>(null as any);
     }
+
+    /**
+     * Get Contact
+     * @return Successful Response
+     */
+    getContact(body: TeamRequest): Promise<TeamContactResponse> {
+        let url_ = this.baseUrl + "/team/get_contact";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetContact(_response);
+        });
+    }
+
+    protected processGetContact(response: Response): Promise<TeamContactResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TeamContactResponse;
+            return result200;
+            });
+        } else if (status === 422) {
+            return response.text().then((_responseText) => {
+            let result422: any = null;
+            result422 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as HTTPValidationError;
+            return throwException("Validation Error", status, _responseText, _headers, result422);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TeamContactResponse>(null as any);
+    }
 }
 
 export class ScoresClient {
@@ -801,6 +848,13 @@ export interface ScoreRequest {
     team_id: number;
     score: number;
     password?: string;
+}
+
+export interface TeamContactResponse {
+    team_id: number;
+    contact_name?: string | undefined;
+    email?: string | undefined;
+    phone?: string | undefined;
 }
 
 export interface TeamDataBulkResponse {

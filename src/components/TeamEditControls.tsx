@@ -11,6 +11,8 @@ interface TeamEditControlsProps {
     onAddScore: (score: number) => Promise<EditResult>;
     onRemoveScore: (score: number) => Promise<EditResult>;
     isPasswordValid: boolean;
+    /** Opens the page's contact-info modal (TeamContactModal). */
+    onShowContact: () => void;
 }
 
 interface Message {
@@ -23,7 +25,8 @@ const TeamEditControls = ({
     onEditTeamName, 
     onAddScore, 
     onRemoveScore,
-    isPasswordValid 
+    isPasswordValid,
+    onShowContact,
 }: TeamEditControlsProps) => {
     const [showEditName, setShowEditName] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
@@ -31,6 +34,7 @@ const TeamEditControls = ({
     const [scoreToRemove, setScoreToRemove] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<Message>({ text: '', type: '' });
+
 
     const handleEditTeamName = async () => {
         if (!newTeamName.trim()) {
@@ -186,6 +190,18 @@ const TeamEditControls = ({
                                 ➖ Remove
                             </Button>
                         </InputGroup>
+                    </div>
+                </Col>
+                <Col md={4}>
+                    <div className="edit-section">
+                        <h6>See Contact Info</h6>
+                        <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={onShowContact}
+                        >
+                            📇 Contact Info
+                        </Button>
                     </div>
                 </Col>
             </Row>

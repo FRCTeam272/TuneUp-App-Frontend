@@ -260,6 +260,47 @@
         }
       }
     },
+    "/team/get_contact": {
+      "post": {
+        "tags": [
+          "Teams"
+        ],
+        "summary": "Get Contact",
+        "operationId": "getContact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamContactResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/score/": {
       "post": {
         "tags": [
@@ -901,6 +942,31 @@
           "score"
         ],
         "title": "ScoreRequest",
+        "additionalProperties": false
+      },
+      "TeamContactResponse": {
+        "properties": {
+          "team_id": {
+            "type": "integer"
+          },
+          "contact_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id"
+        ],
+        "title": "TeamContactResponse",
         "additionalProperties": false
       },
       "TeamDataBulkResponse": {

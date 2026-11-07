@@ -4,8 +4,10 @@ import { Button, Container, Row, Col, Alert } from 'react-bootstrap';
 import { defaultSettings, settingsContext, type Settings } from '../../contexts/settingsContext';
 import { displayApi, errorMessage, scoreApi, teamApi, type DisplayTeamScoresResponse, type EventBase } from '../../api';
 import usePasswordCheck from '../../hooks/usePasswordCheck';
+import useHasMounted from '../../hooks/useHasMounted';
 import TeamDetail from '../../components/TeamDetail';
 import TeamEditControls, { type EditResult } from '../../components/TeamEditControls';
+import TeamContactModal from '../../components/TeamContactModal';
 import Schedule from '../../components/Schedule';
 import '../../App.css';
 
@@ -25,6 +27,7 @@ const TeamPage = ({ teamId }: { teamId: string }) => {
     const [error, setError] = useState<string | null>(null);
     const { isPasswordValid, passwordChecked } = usePasswordCheck(settings.password);
     const [scheduleData, setScheduleData] = useState<EventBase[] | null>(null);
+    const [showContact, setShowContact] = useState(false);
     
     const currentTeamId = teamId;
     const teamIdNumber = parseInt(currentTeamId);
@@ -284,6 +287,7 @@ const TeamPage = ({ teamId }: { teamId: string }) => {
                                 onAddScore={handleAddScore}
                                 onRemoveScore={handleRemoveScore}
                                 isPasswordValid={isPasswordValid}
+                                onShowContact={() => setShowContact(true)}
                             />
                         )}
                         
@@ -300,6 +304,16 @@ const TeamPage = ({ teamId }: { teamId: string }) => {
                                 teamData={teamData} 
                                 divisor={settings.divisor}
                                 rankingData={rankingData}
+                                onTeamNameClick={isPasswordValid ? () => setShowContact(true) : undefined}
+                            />
+                        )}
+                        {isPasswordValid && teamData && (
+                            <TeamContactModal
+                                show={showContact}
+                                onHide={() => setShowContact(false)}
+                                teamId={teamIdNumber}
+                                teamName={teamData.team_name || `Team #${currentTeamId}`}
+                                password={settings.password}
                             />
                         )}
                         {!teamData && !loading && !error && (
@@ -339,6 +353,11 @@ const TeamIndexPage = () => {
 
 // Create the main component with query string routing
 const TeamIndex = ({ location }: PageProps) => {
+    // The team ID is in the query string, which doesn't exist when Gatsby builds this page. Render
+    // nothing until mounted so the first client render matches the built HTML (no hydration error).
+    const hasMounted = useHasMounted();
+    if (!hasMounted) return null;
+
     // Debug logging
     console.log('=== TEAMINDEX COMPONENT RENDER ===');
     console.log('TeamIndex - location:', location);

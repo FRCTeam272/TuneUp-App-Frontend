@@ -1,7 +1,9 @@
 import * as React from "react"
 import type { HeadFC } from "gatsby"
+import useHasMounted from "../hooks/useHasMounted"
 
 const HealthCheckPage = () => {
+  const hasMounted = useHasMounted();
   const [healthStatus, setHealthStatus] = React.useState('checking');
   const [backendStatus, setBackendStatus] = React.useState('checking');
   const [envVars, setEnvVars] = React.useState<Record<string, string | undefined>>({});
@@ -79,7 +81,7 @@ const HealthCheckPage = () => {
 
       <div className="mt-4">
         <h3>Browser Info</h3>
-        {typeof window !== 'undefined' ? (
+        {hasMounted ? (
           <ul className="list-group">
             <li className="list-group-item">User Agent: {navigator.userAgent}</li>
             <li className="list-group-item">URL: {window.location.href}</li>
