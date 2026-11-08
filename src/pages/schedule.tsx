@@ -44,7 +44,7 @@ const SchedulePage = () => {
     };
 
     const handleViewSpreadsheet = () => {
-        navigate("https://docs.google.com/spreadsheets/d/1cVw0m2ApI1b0wr6tsfiTpBFfGQYBZgEh/edit?usp=sharing&ouid=112601030136214038341&rtpof=true&sd=true")
+        navigate("https://docs.google.com/spreadsheets/d/1GK5DF4M099bTDKYOmbcuO3BE0ijsuCImPFexDESD_m0/edit?usp=sharing")
     }
 
     return (
