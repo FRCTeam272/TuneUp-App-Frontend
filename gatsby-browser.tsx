@@ -1,6 +1,7 @@
 import React from 'react';
 import type { GatsbyBrowser } from 'gatsby';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import AdminIndicator from './src/components/AdminIndicator';
 
 // Import global CSS
 import './src/index.css';
@@ -8,7 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Wrap the root element with ErrorBoundary
 export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({ element }) => (
-  <ErrorBoundary>{element}</ErrorBoundary>
+  <ErrorBoundary>{element}<AdminIndicator /></ErrorBoundary>
 );
 
 // Handle client-side routing errors

@@ -27,7 +27,7 @@ Node 22, env vars, redirects). `README.md` is stale CRA boilerplate; `ENVIRONMEN
   error. Show errors with `errorMessage(err)`.
 - `src/contexts/settingsContext.ts` — `Settings` type, `defaultSettings()` (from env vars), `useSettings()`.
   Pages that use settings provide `[settings, setSettings]` themselves.
-- `src/hooks/usePasswordCheck.ts` — admin password check used by home/admin/team.
+- `src/hooks/usePasswordCheck.ts` — admin password check used by home/admin/team/RoomAssignments/AdminIndicator.
 - `src/apiClient/generated.ts` — NSwag-generated typed client (`TeamsClient`, `ScoresClient`,
   `DisplayClient`, `ScheduleClient` + request/response interfaces). **Never edit by hand.**
 - User prefs (password, hidden teams/events, selections) live in `localStorage`; always guard

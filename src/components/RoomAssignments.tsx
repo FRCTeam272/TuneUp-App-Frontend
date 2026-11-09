@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Button, Form, Container } from 'react-bootstrap';
 import { navigate } from 'gatsby';
 import type { RoomAssignmentResponse } from '../api';
+import { storedPassword } from '../contexts/settingsContext';
+import usePasswordCheck from '../hooks/usePasswordCheck';
+import TeamContactModal from './TeamContactModal';
 
 interface RoomAssignmentsProps {
     roomData: RoomAssignmentResponse[];
@@ -14,10 +17,14 @@ const RoomAssignments = ({ roomData }: RoomAssignmentsProps) => {
     const [selectedJudgeGroup, setSelectedJudgeGroup] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isClient, setIsClient] = useState(false);
+    const [password, setPassword] = useState('');
+    const [contactTeam, setContactTeam] = useState<RoomAssignmentResponse | null>(null);
+    const { isPasswordValid } = usePasswordCheck(password);
 
-    // Set client-side flag
+    // Set client-side flag and pick up the saved admin password
     useEffect(() => {
         setIsClient(true);
+        setPassword(storedPassword());
     }, []);
 
     // Load preferences from localStorage on component mount and listen for storage events
@@ -334,7 +341,7 @@ const RoomAssignments = ({ roomData }: RoomAssignmentsProps) => {
                                                     <th>Judge Group</th>
                                                 </>
                                             )}
-                                            <th style={{width: '100px'}}>Actions</th>
+                                            <th style={{width: isPasswordValid ? '190px' : '100px'}}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -373,7 +380,17 @@ const RoomAssignments = ({ roomData }: RoomAssignmentsProps) => {
                                                             </td>
                                                         </>
                                                     )}
-                                                    <td className="text-center">
+                                                    <td className="text-center text-nowrap">
+                                                        {isPasswordValid && (
+                                                            <Button
+                                                                variant="outline-primary"
+                                                                size="sm"
+                                                                className="me-2"
+                                                                onClick={() => setContactTeam(assignment)}
+                                                            >
+                                                                📇 Contact
+                                                            </Button>
+                                                        )}
                                                         <Button
                                                             variant={isHidden ? "outline-success" : "outline-secondary"}
                                                             size="sm"
@@ -413,14 +430,27 @@ const RoomAssignments = ({ roomData }: RoomAssignmentsProps) => {
                                                         Team #{assignment.team_id}
                                                     </div>
                                                 </div>
-                                                <Button
-                                                    variant={isHidden ? "outline-success" : "outline-secondary"}
-                                                    size="sm"
-                                                    onClick={() => toggleTeamVisibility(assignment.team_id)}
-                                                    style={{minHeight: '36px', minWidth: '60px'}}
-                                                >
-                                                    {isHidden ? "Show" : "Hide"}
-                                                </Button>
+                                                <div className="d-flex gap-2">
+                                                    {isPasswordValid && (
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            size="sm"
+                                                            className="text-nowrap"
+                                                            onClick={() => setContactTeam(assignment)}
+                                                            style={{minHeight: '36px'}}
+                                                        >
+                                                            📇 Contact
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        variant={isHidden ? "outline-success" : "outline-secondary"}
+                                                        size="sm"
+                                                        onClick={() => toggleTeamVisibility(assignment.team_id)}
+                                                        style={{minHeight: '36px', minWidth: '60px'}}
+                                                    >
+                                                        {isHidden ? "Show" : "Hide"}
+                                                    </Button>
+                                                </div>
                                             </div>
                                             
                                             <div className="row g-2">
@@ -479,6 +509,15 @@ const RoomAssignments = ({ roomData }: RoomAssignmentsProps) => {
                     </Card.Footer>
                 )}
             </Card>
+            {isPasswordValid && contactTeam && (
+                <TeamContactModal
+                    show
+                    onHide={() => setContactTeam(null)}
+                    teamId={contactTeam.team_id}
+                    teamName={contactTeam.team_name || `Team #${contactTeam.team_id}`}
+                    password={password}
+                />
+            )}
         </Container>
     );
 };

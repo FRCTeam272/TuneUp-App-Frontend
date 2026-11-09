@@ -1,10 +1,11 @@
 import React from "react"
 import type { GatsbySSR } from "gatsby"
 import ErrorBoundary from './src/components/ErrorBoundary';
+import AdminIndicator from './src/components/AdminIndicator';
 
 // Wrap the root element with ErrorBoundary for SSR
 export const wrapRootElement: GatsbySSR['wrapRootElement'] = ({ element }) => (
-  <ErrorBoundary>{element}</ErrorBoundary>
+  <ErrorBoundary>{element}<AdminIndicator /></ErrorBoundary>
 );
 
 export const onRenderBody: GatsbySSR['onRenderBody'] = ({ setHeadComponents }) => {
