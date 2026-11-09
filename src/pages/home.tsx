@@ -3,13 +3,21 @@ import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, InputGroup } from 'react-bootstrap';
 import { navigate, type HeadFC } from 'gatsby';
 import usePasswordCheck from '../hooks/usePasswordCheck';
+import TeamNumberInput from '../components/TeamNumberInput';
+import { displayApi, type DisplayTeamScoresResponse } from '../api';
 import '../App.css';
 import '../mobile.css';
 
 const IndexPage = () => {
     const [teamNumber, setTeamNumber] = useState('');
     const [password, setPassword] = useState('');
+    const [teams, setTeams] = useState<DisplayTeamScoresResponse[]>([]);
     const { isPasswordValid } = usePasswordCheck(password);
+
+    useEffect(() => {
+        // Only for suggestions: the input still works if this fails
+        displayApi.getDisplay().then(setTeams).catch((err) => console.error('Error fetching teams:', err));
+    }, []);
 
     useEffect(() => {
         // Only access localStorage on the client side
@@ -74,10 +82,6 @@ const IndexPage = () => {
         }
     };
 
-    const handleTeamInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTeamNumber(e.target.value);
-    };
-
     return (
         <Container className="mt-3 mt-md-5">
             <Row className="justify-content-center">
@@ -132,15 +136,13 @@ const IndexPage = () => {
                                         <Col xs={12} md={8} lg={6} xl={5}>
                                             <div className="d-md-none mb-3">
                                                 {/* Mobile: Stacked layout */}
-                                                <Form.Control
-                                                    type="text"
+                                                <TeamNumberInput
+                                                    teams={teams}
                                                     placeholder="Enter team number (e.g., 12345)"
                                                     value={teamNumber}
-                                                    onChange={handleTeamInputChange}
-                                                    pattern="[0-9]*"
-                                                    inputMode="numeric"
+                                                    onChange={setTeamNumber}
                                                     size="lg"
-                                                    className="mb-2"
+                                                    wrapperClassName="mb-2"
                                                 />
                                                 <Button 
                                                     variant="success"
@@ -154,20 +156,22 @@ const IndexPage = () => {
                                             </div>
                                             <div className="d-none d-md-block">
                                                 {/* Desktop: Input group layout */}
-                                                <InputGroup size="lg">
-                                                    <Form.Control
-                                                        type="text"
+                                                <InputGroup size="lg" className="flex-nowrap">
+                                                    <TeamNumberInput
+                                                        teams={teams}
                                                         placeholder="Enter team number (e.g., 12345)"
                                                         value={teamNumber}
-                                                        onChange={handleTeamInputChange}
-                                                        pattern="[0-9]*"
-                                                        inputMode="numeric"
+                                                        onChange={setTeamNumber}
+                                                        size="lg"
+                                                        className="rounded-end-0"
+                                                        wrapperClassName="flex-grow-1"
+                                                        listMinWidth="16rem"
                                                     />
                                                     <Button 
                                                         variant="success"
                                                         type="submit"
                                                         disabled={!teamNumber.trim() || !/^\d+$/.test(teamNumber.trim())}
-                                                        className="projector-button"
+                                                        className="projector-button text-nowrap"
                                                     >
                                                         Go to Team
                                                     </Button>

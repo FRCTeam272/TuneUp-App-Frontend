@@ -4,6 +4,7 @@ import { Button, Container, Row, Col, Alert, Form, Badge, Card, Table, Spinner }
 import { defaultSettings, settingsContext, type Settings } from '../contexts/settingsContext';
 import { displayApi, errorMessage, teamApi, type DisplayTeamScoresResponse, type EventBase } from '../api';
 import MultiTeamComparison from '../components/MultiTeamComparison';
+import TeamNumberInput from '../components/TeamNumberInput';
 import '../App.css';
 
 const MultiTeamPage = () => {
@@ -117,15 +118,11 @@ const MultiTeamPage = () => {
         });
     };
 
-    const handleAddTeamFromInput = () => {
-        if (teamInputValue.trim()) {
-            handleAddTeam(teamInputValue.trim());
-        }
-    };
+    const teamInputIsNumber = /^\d+$/.test(teamInputValue.trim());
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleAddTeamFromInput();
+    const handleAddTeamFromInput = () => {
+        if (teamInputIsNumber) {
+            handleAddTeam(teamInputValue.trim());
         }
     };
 
@@ -290,17 +287,18 @@ const MultiTeamPage = () => {
                                         <Form.Group>
                                             <Form.Label>Add Team by Number:</Form.Label>
                                             <div className="d-flex gap-2">
-                                                <Form.Control
-                                                    type="number"
+                                                <TeamNumberInput
+                                                    teams={allTeams.filter((team) => !selectedTeams.includes(team.team_id))}
                                                     placeholder="Enter team number..."
                                                     value={teamInputValue}
-                                                    onChange={(e) => setTeamInputValue(e.target.value)}
-                                                    onKeyPress={handleKeyPress}
+                                                    onChange={setTeamInputValue}
+                                                    onEnter={handleAddTeamFromInput}
+                                                    wrapperClassName="flex-grow-1"
                                                 />
-                                                <Button 
+                                                <Button
                                                     onClick={handleAddTeamFromInput}
                                                     className="projector-button"
-                                                    disabled={!teamInputValue.trim()}
+                                                    disabled={!teamInputIsNumber}
                                                 >
                                                     Add
                                                 </Button>

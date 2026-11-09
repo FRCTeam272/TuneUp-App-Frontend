@@ -9,6 +9,7 @@ import { faCheckCircle } from "@fortawesome/free-regular-svg-icons"
 import { toast } from "react-hot-toast"
 import { errorMessage, scoreApi, type DisplayTeamScoresResponse } from "../api"
 import { useSettings } from "../contexts/settingsContext"
+import TeamNumberInput from "./TeamNumberInput"
 import "../mobile.css"
 
 interface InputFormProps {
@@ -48,7 +49,9 @@ export default function InputForm({teamData}: InputFormProps){
     const form = fields.map((item) =>
         <Form.Group key={item.key} className="projector-form">
                 <Form.Label>{item.text}</Form.Label>
-                <Form.Control id={item.id} type="text" {...item.input}></Form.Control>
+                {item.key === "number"
+                    ? <TeamNumberInput id={item.id} teams={teamData} value={number.value} onChange={number.onChange} />
+                    : <Form.Control id={item.id} type="text" {...item.input}></Form.Control>}
         </Form.Group>
     )
 
