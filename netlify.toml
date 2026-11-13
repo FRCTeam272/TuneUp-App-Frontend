@@ -10,21 +10,16 @@
   GATSBY_DIVISOR = "3"
   GATSBY_CORS_ENABLED = "true"
 
-# Redirect root to home
+# Handle API calls - proxy to backend during runtime
+# (must come before the /* catch-all: Netlify uses the first matching rule)
 [[redirects]]
-  from = "/"
-  to = "/home"
-  status = 301
+  from = "/api/*"
+  to = "https://tuneup-backend-7cb9db42de78.herokuapp.com/:splat"
+  status = 200
+  force = false
 
 # Handle client-side routing
 [[redirects]]
   from = "/*"
   to = "/home"
   status = 200
-
-# Handle API calls - proxy to backend during runtime
-[[redirects]]
-  from = "/api/*"
-  to = "https://tuneup-backend-7cb9db42de78.herokuapp.com/:splat"
-  status = 200
-  force = false

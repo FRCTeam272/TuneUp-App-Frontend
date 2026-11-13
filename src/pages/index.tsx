@@ -1,14 +1,6 @@
-import * as React from "react"
-import { navigate, type HeadFC } from 'gatsby';
+// "/" renders the main menu directly (same page as /home) instead of redirecting,
+// so it works without JavaScript or a Netlify redirect.
+import HomePage, { Head as HomeHead } from './home';
 
-const RealIndexPage = () => {
-  React.useEffect(() => {
-    navigate('/home', { replace: true });
-  }, []);
-
-  return null; // Return null to prevent any content flash
-};
-
-export default RealIndexPage;
-
-export const Head: HeadFC = () => <title>Index</title>
+export default HomePage;
+export const Head = HomeHead;
