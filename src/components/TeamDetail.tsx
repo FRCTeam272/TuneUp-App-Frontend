@@ -2,6 +2,7 @@ import { navigate } from 'gatsby';
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Row, Col, ProgressBar } from 'react-bootstrap';
 import type { DisplayTeamScoresResponse } from '../api';
+import '../mobile.css';
 
 type Trend = 'improving' | 'declining' | 'stable' | 'insufficient-data';
 
@@ -183,6 +184,9 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [], onTeamNameClick }
 
     const maxScore = processedData.highestScore || 100;
     const rankingInfo = processedData.currentTeamRankingInfo;
+    const nearbySorted = rankingInfo ? [...rankingInfo.nearbyTeams].sort((a, b) => a.rank - b.rank) : [];
+    const rankBadgeBg = (team: RankedTeam) =>
+        team.isCurrent ? 'primary' : team.rank <= 3 ? 'warning' : team.rank <= 10 ? 'info' : 'secondary';
 
     return (
         <div className="team-detail-container">
@@ -250,7 +254,59 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [], onTeamNameClick }
                     <Card.Header className="projector-card-header">
                         <h3 className="mb-0">📊 Nearby Teams in Rankings</h3>
                     </Card.Header>
-                    <Card.Body className="projector-card-body">
+                    <Card.Body className="projector-card-body nearby-teams-body">
+                        {/* Mobile: compact stacked rows */}
+                        <div className="d-md-none nearby-teams-list">
+                            {nearbySorted.map((team) => {
+                                const scoreDiff = (team.average_top_three || 0) - (rankingInfo.average_top_three || 0);
+                                const { isAbove, isCurrent } = team;
+                                const goToTeam = () => navigate(`/team?id=${team.team_id}`);
+                                return (
+                                    <div
+                                        key={team.team_id}
+                                        className={`nearby-team-row${isCurrent ? ' is-current' : ''}`}
+                                        {...(!isCurrent && {
+                                            role: 'button',
+                                            tabIndex: 0,
+                                            onClick: goToTeam,
+                                            onKeyDown: (e: React.KeyboardEvent) => {
+                                                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToTeam(); }
+                                            },
+                                        })}
+                                    >
+                                        <Badge bg={rankBadgeBg(team)} className="rank-badge flex-shrink-0">
+                                            #{team.rank}
+                                        </Badge>
+                                        <div className="flex-grow-1 min-w-0">
+                                            <div className="fw-bold text-truncate">
+                                                {team.team_id}
+                                                {isCurrent && <small className="ms-2 text-primary">← YOU</small>}
+                                            </div>
+                                            <div className={`small text-truncate ${isCurrent ? 'text-primary' : 'text-muted'}`}>
+                                                {team.team_name || 'N/A'}
+                                            </div>
+                                        </div>
+                                        <div className="text-end flex-shrink-0">
+                                            <div className={`fw-bold ${isCurrent ? 'text-primary' : isAbove ? 'text-success' : 'text-danger'}`}>
+                                                {(team.average_top_three || 0).toFixed(1)}
+                                            </div>
+                                            <div className="small">
+                                                {isCurrent ? (
+                                                    <span className="text-muted">—</span>
+                                                ) : (
+                                                    <span className={isAbove ? 'text-success' : 'text-danger'}>
+                                                        {isAbove ? '+' : ''}{scoreDiff.toFixed(1)} {isAbove ? '↑' : '↓'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Tablet/desktop: full table */}
+                        <div className="d-none d-md-block">
                         <Table className="projector-table">
                             <thead>
                                 <tr>
@@ -262,9 +318,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [], onTeamNameClick }
                                 </tr>
                             </thead>
                             <tbody>
-                                {rankingInfo.nearbyTeams
-                                    .sort((a, b) => a.rank - b.rank) // Sort by rank to maintain order
-                                    .map((team, index) => {
+                                {nearbySorted.map((team) => {
                                     const scoreDiff = (team.average_top_three || 0) - (rankingInfo.average_top_three || 0);
                                     const isAbove = team.isAbove;
                                     const isBelow = team.isBelow;
@@ -282,11 +336,7 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [], onTeamNameClick }
                                         >
                                             <td>
                                                 <Badge 
-                                                    bg={
-                                                        isCurrent ? 'primary' :
-                                                        team.rank <= 3 ? 'warning' : 
-                                                        team.rank <= 10 ? 'info' : 'secondary'
-                                                    }
+                                                    bg={rankBadgeBg(team)}
                                                     className="rank-badge"
                                                 >
                                                     #{team.rank}
@@ -335,12 +385,13 @@ const TeamDetail = ({ teamData, divisor = 3, rankingData = [], onTeamNameClick }
                                 })}
                             </tbody>
                         </Table>
+                        </div>
                         <div className="mt-3">
                             <small className="text-muted">
                                 <strong>Score Gap:</strong> Difference between their average score and your current average ({(rankingInfo.average_top_three || 0).toFixed(1)})
                                 <br />
-                                <strong>Green (↑):</strong> Teams performing better than you
-                                <strong className="ms-3">Red (↓):</strong> Teams performing below you
+                                <span className="d-inline-block me-3"><strong>Green (↑):</strong> Teams performing better than you</span>
+                                <span className="d-inline-block"><strong>Red (↓):</strong> Teams performing below you</span>
                             </small>
                         </div>
                     </Card.Body>
