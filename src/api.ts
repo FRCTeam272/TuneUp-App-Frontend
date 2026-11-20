@@ -108,8 +108,10 @@ interface ForceOption {
 }
 
 export const teamApi = {
-    getAllTeams(): Promise<TeamDataBulkResponse> {
-        return read(cachedJson(KEYS.scores + 'teams', () => teams.getAllTeams()));
+    getAllTeams({ fresh = false }: { fresh?: boolean } = {}): Promise<TeamDataBulkResponse> {
+        return read(fresh
+            ? teams.getAllTeams()
+            : cachedJson(KEYS.scores + 'teams', () => teams.getAllTeams()));
     },
 
     createTeam(teamId: number, name: string, password: string): Promise<TeamSingularResponse> {

@@ -1,10 +1,12 @@
 import * as React from "react"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { navigate, type HeadFC, type PageProps } from 'gatsby';
 import toast, { Toaster } from 'react-hot-toast';
 import RoomAssignments from '../components/RoomAssignments';
-import { scheduleApi, type RoomAssignmentResponse } from "../api";
+import { errorMessage, scheduleApi, teamApi, type RoomAssignmentResponse } from "../api";
+import { storedPassword } from '../contexts/settingsContext';
+import usePasswordCheck from '../hooks/usePasswordCheck';
 import '../App.css';
 import '../mobile.css';
 
@@ -14,6 +16,75 @@ const RoomsPage = ({ location }: PageProps) => {
     const [error, setError] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [showShareUrl, setShowShareUrl] = useState(false);
+    const [password, setPassword] = useState('');
+    const { isPasswordValid } = usePasswordCheck(password);
+    const [emailLoading, setEmailLoading] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [emailLink, setEmailLink] = useState<string | null>(null);
+    const [missingEmails, setMissingEmails] = useState(0);
+    const emailRequest = useRef(0);
+
+    useEffect(() => {
+        setPassword(storedPassword());
+        const handleStorage = (event: StorageEvent) => {
+            if (event.key === 'password' || event.key === null) {
+                emailRequest.current++;
+                setPassword(storedPassword());
+                setEmailLink(null);
+                setEmailError(null);
+                setEmailLoading(false);
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => {
+            emailRequest.current++;
+            window.removeEventListener('storage', handleStorage);
+        };
+    }, []);
+
+    const prepareContactEmail = async () => {
+        const request = ++emailRequest.current;
+        setEmailLoading(true);
+        setEmailError(null);
+        setEmailLink(null);
+        setMissingEmails(0);
+        try {
+            const { team_data } = await teamApi.getAllTeams({ fresh: true });
+            const teamIds = [...new Set(team_data.map(team => team.team_id))];
+            const emails: string[] = [];
+            let missing = 0;
+            for (let i = 0; i < teamIds.length; i += 10) {
+                if (request !== emailRequest.current) return;
+                const contacts = await Promise.all(
+                    teamIds.slice(i, i + 10).map(teamId => teamApi.getContact(teamId, password))
+                );
+                for (const contact of contacts) {
+                    const email = contact.email?.trim();
+                    if (!email) {
+                        missing++;
+                    } else if (!/^[^\s@,;<>]+@[^\s@,;<>]+$/.test(email)) {
+                        throw new Error(`Team ${contact.team_id} has an invalid email address.`);
+                    } else {
+                        emails.push(email);
+                    }
+                }
+            }
+            const uniqueEmails = [...new Map(emails.map(email => {
+                const at = email.lastIndexOf('@');
+                return [email.slice(0, at) + email.slice(at).toLowerCase(), email];
+            })).values()];
+            if (!uniqueEmails.length) {
+                throw new Error('No team contact email addresses are available.');
+            }
+            if (request !== emailRequest.current) return;
+            setMissingEmails(missing);
+            setEmailLink(`mailto:?bcc=${uniqueEmails.map(encodeURIComponent).join(',')}`);
+        } catch (err) {
+            if (request === emailRequest.current) setEmailError(errorMessage(err));
+        } finally {
+            if (request === emailRequest.current) setEmailLoading(false);
+        }
+    };
 
     // Parse URL parameters for hidden teams
     const getHiddenTeamsFromUrl = (): Set<number> => {
@@ -302,6 +373,25 @@ const RoomsPage = ({ location }: PageProps) => {
                                 Hidden teams are remembered and can be shared via URL.
                             </small>
                         </div>
+                    </Col>
+                </Row>
+            )}
+
+            {isPasswordValid && (
+                <Row className="mt-4">
+                    <Col xs={12} className="text-center">
+                        <Button variant="primary" onClick={prepareContactEmail} disabled={emailLoading}>
+                            {emailLoading ? 'Loading contacts…' : 'Prepare email to all team contacts'}
+                        </Button>
+                        {emailError && <Alert variant="danger" className="mt-3 mb-0">{emailError}</Alert>}
+                        {emailLink && (
+                            <div className="mt-3">
+                                {missingEmails > 0 && (
+                                    <p className="text-muted">{missingEmails} team(s) have no contact email on file.</p>
+                                )}
+                                <Button href={emailLink} variant="success">Open email with all contacts in BCC</Button>
+                            </div>
+                        )}
                     </Col>
                 </Row>
             )}
