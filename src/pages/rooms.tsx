@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button, Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { navigate, type HeadFC, type PageProps } from 'gatsby';
 import toast, { Toaster } from 'react-hot-toast';
@@ -22,12 +22,28 @@ const RoomsPage = ({ location }: PageProps) => {
     const [emailError, setEmailError] = useState<string | null>(null);
     const [emailLink, setEmailLink] = useState<string | null>(null);
     const [missingEmails, setMissingEmails] = useState(0);
+    const emailRequest = useRef(0);
 
     useEffect(() => {
         setPassword(storedPassword());
+        const handleStorage = (event: StorageEvent) => {
+            if (event.key === 'password' || event.key === null) {
+                emailRequest.current++;
+                setPassword(storedPassword());
+                setEmailLink(null);
+                setEmailError(null);
+                setEmailLoading(false);
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => {
+            emailRequest.current++;
+            window.removeEventListener('storage', handleStorage);
+        };
     }, []);
 
     const prepareContactEmail = async () => {
+        const request = ++emailRequest.current;
         setEmailLoading(true);
         setEmailError(null);
         setEmailLink(null);
@@ -38,6 +54,7 @@ const RoomsPage = ({ location }: PageProps) => {
             const emails: string[] = [];
             let missing = 0;
             for (let i = 0; i < teamIds.length; i += 10) {
+                if (request !== emailRequest.current) return;
                 const contacts = await Promise.all(
                     teamIds.slice(i, i + 10).map(teamId => teamApi.getContact(teamId, password))
                 );
@@ -52,16 +69,20 @@ const RoomsPage = ({ location }: PageProps) => {
                     }
                 }
             }
-            const uniqueEmails = [...new Map(emails.map(email => [email.toLowerCase(), email])).values()];
+            const uniqueEmails = [...new Map(emails.map(email => {
+                const at = email.lastIndexOf('@');
+                return [email.slice(0, at) + email.slice(at).toLowerCase(), email];
+            })).values()];
             if (!uniqueEmails.length) {
                 throw new Error('No team contact email addresses are available.');
             }
+            if (request !== emailRequest.current) return;
             setMissingEmails(missing);
             setEmailLink(`mailto:?bcc=${uniqueEmails.map(encodeURIComponent).join(',')}`);
         } catch (err) {
-            setEmailError(errorMessage(err));
+            if (request === emailRequest.current) setEmailError(errorMessage(err));
         } finally {
-            setEmailLoading(false);
+            if (request === emailRequest.current) setEmailLoading(false);
         }
     };
 
